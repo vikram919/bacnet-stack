@@ -1,0 +1,8 @@
+#!/bin/bash
+# Starting BACnet server device 
+# Usage: bacserv [device-instance [device-name]] 
+
+device_instance=123
+# device_name=demo
+../server/bacserv $device_instance
+

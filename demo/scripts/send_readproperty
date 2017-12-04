@@ -1,0 +1,15 @@
+#!/bin/bash
+# Sending read-property request
+# Usage: bacrp device-instance object-type object-instance property [index]
+# For further information see bacenum.h in include folder
+# Example: read present-value from analog-output 1 on device 123
+# bacrp 123 1 0 85 
+
+device_instance=123
+object_type=1
+object_instance=0
+property=85
+
+../readprop/bacrp $device_instance $object_type $object_instance $property
+
+
