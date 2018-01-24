@@ -43,6 +43,10 @@
 #include "txbuf.h"
 #include "client.h"
 
+#include "bacsec.h"
+
+#define SECURITY_ENABLED 1
+
 /** @file s_rp.c  Send Read Property request. */
 
 /** Sends a Read Property request
@@ -60,6 +64,7 @@
  * @return invoke id of outgoing message, or 0 if device is not bound or no tsm available
  */
 uint8_t Send_Read_Property_Request_Address(
+	uint32_t device_id,
     BACNET_ADDRESS * dest,
     uint16_t max_apdu,
     BACNET_OBJECT_TYPE object_type,
@@ -75,6 +80,11 @@ uint8_t Send_Read_Property_Request_Address(
     BACNET_READ_PROPERTY_DATA data;
     BACNET_NPDU_DATA npdu_data;
 
+#if SECURITY_ENABLED
+    uint8_t apdu[MAX_APDU];
+#endif
+
+
     if (!dcc_communication_enabled()) {
         return 0;
     }
@@ -86,18 +96,92 @@ uint8_t Send_Read_Property_Request_Address(
     if (invoke_id) {
         /* encode the NPDU portion of the packet */
         datalink_get_my_address(&my_address);
+
         npdu_encode_npdu_data(&npdu_data, true, MESSAGE_PRIORITY_NORMAL);
+
+#if SECURITY_ENABLED
+        npdu_data.network_layer_message = true;
+        npdu_data.network_message_type = NETWORK_MESSAGE_SECURITY_PAYLOAD;
+#endif
+
         pdu_len =
             npdu_encode_pdu(&Handler_Transmit_Buffer[0], dest, &my_address,
             &npdu_data);
+
         /* encode the APDU portion of the packet */
         data.object_type = object_type;
         data.object_instance = object_instance;
         data.object_property = object_property;
         data.array_index = array_index;
+
+#if SECURITY_ENABLED
+        BACNET_SECURITY_WRAPPER wrapper;
+
+        // control octet:
+        wrapper.payload_net_or_bvll_flag = false;
+        wrapper.encrypted_flag = true;
+        // bit 5: reserved, shall be zero
+        wrapper.authentication_flag = true;
+        wrapper.do_not_unwrap_flag = false;
+        wrapper.do_not_decrypt_flag = false;
+        wrapper.non_trusted_source_flag = false;
+        wrapper.secured_by_router_flag = false;
+
+        wrapper.key_revision = 0;
+        // key identifier: 0 indicates device master key
+        wrapper.key_identifier = KIKN_DEVICE_MASTER;
+        // ???
+        wrapper.source_device_instance = 1;
+        // message id: 32 bit integer, increased by 1 for each message
+        wrapper.message_id = 1;
+        // timestamp: standard UNIX timestamp
+        wrapper.timestamp = time(NULL);
+        wrapper.destination_device_instance = device_id;
+        // destination and source network information
+
+
+        wrapper.dnet = dest->net;
+        wrapper.dlen = dest->len;
+        memcpy(wrapper.dadr, dest->adr, dest->len);
+
+        wrapper.snet = my_address.net;
+        wrapper.slen = my_address.len;
+        memcpy(wrapper.sadr, my_address.adr, my_address.len);
+        // ???
+        wrapper.authentication_mechanism = 0;
+        wrapper.user_id = 0;
+        wrapper.user_role = 0;
+
+//	    wrapper.authentication_data_length =
+//  	wrapper.vendor_id =
+//		wrapper.authentication_data =
+//
+        // encode service data
+        data.object_type = object_type;
+        data.object_instance = object_instance;
+        data.object_property = object_property;
+        data.array_index = array_index;
+
+        wrapper.service_data_len =
+        		(uint8_t)rp_encode_apdu(/*&apdu[0]*/ &wrapper.service_data[0], invoke_id, &data);
+
+        memcpy(&wrapper.service_data, &apdu, wrapper.service_data_len);
+        // First octet of service data ??
+
+//      wrapper.service_type = wrapper.service_data[0];
+
+        memcpy(&wrapper.service_type, &wrapper.service_data, sizeof(wrapper.service_data));
+
+//      wrapper.padding_len =
+//      wrapper.padding =
+//      wrapper.signature =
+
         len =
-            rp_encode_apdu(&Handler_Transmit_Buffer[pdu_len], invoke_id,
-            &data);
+        	encode_security_wrapper(1, &Handler_Transmit_Buffer[pdu_len], &wrapper);
+#else
+        len =
+           	rp_encode_apdu(&Handler_Transmit_Buffer[pdu_len], invoke_id, &data);
+#endif
         pdu_len += len;
         /* will it fit in the sender?
            note: if there is a bottleneck router in between
@@ -159,7 +243,7 @@ uint8_t Send_Read_Property_Request(
     status = address_get_by_device(device_id, &max_apdu, &dest);
     if (status) {
         invoke_id =
-            Send_Read_Property_Request_Address(&dest, max_apdu, object_type,
+            Send_Read_Property_Request_Address(device_id, &dest, max_apdu, object_type,
             object_instance, object_property, array_index);
     }
 

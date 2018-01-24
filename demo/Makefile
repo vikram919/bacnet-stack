@@ -30,7 +30,7 @@ endif
 ifeq (${BACNET_PORT},linux)
 PFLAGS = -pthread
 TARGET_EXT =
-SYSTEM_LIB=-lc,-lgcc,-lrt,-lm
+SYSTEM_LIB=-lc,-lgcc,-lrt,-lm,-lcrypto
 endif
 ifeq (${BACNET_PORT},bsd)
 PFLAGS = -pthread

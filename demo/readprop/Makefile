@@ -15,7 +15,8 @@ TARGET = bacrp
 TARGET_BIN = ${TARGET}$(TARGET_EXT)
 
 SRCS = main.c \
-	../object/device-client.c
+	../object/device-client.c \
+	../../ports/linux/bacsec_linux.c
 
 OBJS = ${SRCS:.c=.o}
 

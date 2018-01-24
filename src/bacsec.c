@@ -42,6 +42,7 @@ int encode_security_wrapper(int bytes_before,
     uint8_t * apdu,
     BACNET_SECURITY_WRAPPER * wrapper)
 {
+
     int curr = 0;
     int enc_begin = 0;
     BACNET_KEY_ENTRY key;
@@ -70,6 +71,7 @@ int encode_security_wrapper(int bytes_before,
         apdu[curr] |= 1;
     }
     curr++;
+
     /* basic integrity checks */
     if (wrapper->do_not_decrypt_flag && !wrapper->do_not_unwrap_flag) {
         return -SEC_RESP_MALFORMED_MESSAGE;
