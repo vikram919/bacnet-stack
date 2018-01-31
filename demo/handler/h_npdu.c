@@ -33,6 +33,7 @@
 #include "apdu.h"
 #include "handlers.h"
 #include "client.h"
+#include "bacsec.h"
 
 #if PRINT_ENABLED
 #include <stdio.h>
@@ -76,10 +77,30 @@ void npdu_handler(
     if (pdu[0] == BACNET_PROTOCOL_VERSION) {
         apdu_offset = npdu_decode(&pdu[0], &dest, src, &npdu_data);
         if (npdu_data.network_layer_message) {
-            /*FIXME: network layer message received!  Handle it! */
+            /*FIXME: Only secured Network Layer Message Types handled*/
+
+        	if(npdu_data.network_message_type >= NETWORK_MESSAGE_CHALLENGE_REQUEST &&
+        	   npdu_data.network_message_type <= NETWORK_MESSAGE_SET_MASTER_KEY) {
+
+        		fprintf(stdout, "Received secured message!\n");
+
+        		uint32_t apdu_len_remaining = pdu_len - apdu_offset;
+        		BACNET_SECURITY_WRAPPER wrapper;
+
+        		printf("%d\n", wrapper.service_data_len);
+
+        		decode_security_wrapper_safe(1, &pdu[apdu_offset], apdu_len_remaining, &wrapper);
+
+        		printf("%d\n", wrapper.service_data_len);
+
+        		apdu_handler(src, &wrapper.service_data[0],
+        				wrapper.service_data_len);
+        	}
+        	else{
 #if PRINT_ENABLED
-            fprintf(stderr, "NPDU: Network Layer Message discarded!\n");
+            fprintf(stdout, "NPDU: Network Layer Message discarded!\n");
 #endif
+       		}
         } else if ((apdu_offset > 0) && (apdu_offset <= pdu_len)) {
             if ((dest.net == 0) || (dest.net == BACNET_BROADCAST_NETWORK)) {
                 /* only handle the version that we know how to handle */

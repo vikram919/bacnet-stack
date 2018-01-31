@@ -163,7 +163,7 @@ uint8_t Send_Read_Property_Request_Address(
         data.array_index = array_index;
 
         wrapper.service_data_len =
-        		(uint8_t)rp_encode_apdu(/*&apdu[0]*/ &wrapper.service_data[0], invoke_id, &data);
+        		(uint8_t)rp_encode_apdu(&wrapper.service_data[0], invoke_id, &data);
 
         memcpy(&wrapper.service_data, &apdu, wrapper.service_data_len);
         // First octet of service data ??
