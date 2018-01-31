@@ -215,7 +215,7 @@ int main(
 
     // set master key
     BACNET_KEY_ENTRY key;
-    key.key_identifier = KIKN_DEVICE_MASTER;
+    key.key_identifier = KIKN_GENERAL_NETWORK_ACCESS;
     key.key_len = sizeof(KEY);
     memcpy(key.key, &KEY, sizeof(KEY));
 

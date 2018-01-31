@@ -121,15 +121,16 @@ uint8_t Send_Read_Property_Request_Address(
         wrapper.payload_net_or_bvll_flag = false;
         wrapper.encrypted_flag = true;
         // bit 5: reserved, shall be zero
-        wrapper.authentication_flag = true;
+        wrapper.authentication_flag = false;
         wrapper.do_not_unwrap_flag = false;
         wrapper.do_not_decrypt_flag = false;
         wrapper.non_trusted_source_flag = false;
         wrapper.secured_by_router_flag = false;
 
-        wrapper.key_revision = 0;
+        wrapper.key_revision = 1;
         // key identifier: 0 indicates device master key
-        wrapper.key_identifier = KIKN_DEVICE_MASTER;
+        //wrapper.key_identifier = KIKN_DEVICE_MASTER;
+        wrapper.key_identifier = KIKN_GENERAL_NETWORK_ACCESS;
         // ???
         wrapper.source_device_instance = 1;
         // message id: 32 bit integer, increased by 1 for each message

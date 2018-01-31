@@ -89,7 +89,7 @@ void npdu_handler(
 
         		printf("%d\n", wrapper.service_data_len);
 
-        		decode_security_wrapper_safe(1, &pdu[apdu_offset], apdu_len_remaining, &wrapper);
+        		printf("%d\n", decode_security_wrapper_safe(1, &pdu[apdu_offset], apdu_len_remaining, &wrapper));
 
         		printf("%d\n", wrapper.service_data_len);
 
