@@ -85,12 +85,11 @@ void npdu_handler(
         		fprintf(stdout, "Received secured message!\n");
 
         		uint32_t apdu_len_remaining = pdu_len - apdu_offset;
-        		        		BACNET_SECURITY_WRAPPER wrapper;
+        		BACNET_SECURITY_WRAPPER wrapper = { 0 };
+
         		printf("pdu_len: %d\n", pdu_len);
         		printf("apdu_offset: %d\n", apdu_offset);
         		printf("apdu_len_remaining: %d\n", apdu_len_remaining);
-
-        		printf("%d\n", wrapper.service_data_len);
 
         		printf("%d\n", decode_security_wrapper_safe(1, &pdu[apdu_offset], apdu_len_remaining, &wrapper));
 
