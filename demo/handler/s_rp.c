@@ -81,7 +81,7 @@ uint8_t Send_Read_Property_Request_Address(
     BACNET_NPDU_DATA npdu_data;
 
 #if SECURITY_ENABLED
-    uint8_t apdu[MAX_APDU];
+    uint8_t test[MAX_APDU];
 #endif
 
 
@@ -119,7 +119,9 @@ uint8_t Send_Read_Property_Request_Address(
 
         // control octet:
         wrapper.payload_net_or_bvll_flag = false;
-        wrapper.encrypted_flag = true;
+
+//        wrapper.encrypted_flag = true;
+        wrapper.encrypted_flag = false;
         // bit 5: reserved, shall be zero
         wrapper.authentication_flag = false;
         wrapper.do_not_unwrap_flag = false;
@@ -143,12 +145,14 @@ uint8_t Send_Read_Property_Request_Address(
 
 
         wrapper.dnet = dest->net;
-        wrapper.dlen = dest->len;
-        memcpy(wrapper.dadr, dest->adr, dest->len);
-
+//        wrapper.dlen = dest->len;
+        wrapper.dlen = sizeof(dest->adr);
+        memcpy(wrapper.dadr, dest->adr, wrapper.dlen);
         wrapper.snet = my_address.net;
-        wrapper.slen = my_address.len;
-        memcpy(wrapper.sadr, my_address.adr, my_address.len);
+//        wrapper.slen = my_address.len;
+        wrapper.slen = sizeof(my_address.adr);
+        memcpy(wrapper.sadr, my_address.adr, wrapper.slen);
+
         // ???
         wrapper.authentication_mechanism = 0;
         wrapper.user_id = 0;
@@ -164,15 +168,17 @@ uint8_t Send_Read_Property_Request_Address(
         data.object_property = object_property;
         data.array_index = array_index;
 
+        wrapper.service_data = test;
         wrapper.service_data_len =
-        		(uint8_t)rp_encode_apdu(&wrapper.service_data[0], invoke_id, &data);
+        		(uint8_t)rp_encode_apdu(&wrapper.service_data[2], invoke_id, &data);
+        encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
 
-        memcpy(&wrapper.service_data, &apdu, wrapper.service_data_len);
+        wrapper.service_data_len += 2;
+
+        // memcpy(&wrapper.service_data, &apdu, wrapper.service_data_len);
         // First octet of service data ??
 
-//      wrapper.service_type = wrapper.service_data[0];
-
-        memcpy(&wrapper.service_type, &wrapper.service_data, sizeof(wrapper.service_data));
+        wrapper.service_type = wrapper.service_data[2];
 
 //      wrapper.padding_len =
 //      wrapper.padding =

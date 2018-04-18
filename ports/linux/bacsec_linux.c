@@ -150,6 +150,25 @@ bool key_decrypt_msg(BACNET_KEY_ENTRY * key,
     return true;
 }
 
+//void key_set_padding(BACNET_KEY_ENTRY * key,
+//    int enc_len,
+//    uint16_t * padding_len,
+//    uint8_t * padding)
+//{
+//    /* in the future, we should check for the block size, but for now it is always 16 */
+//    int i;
+//    uint16_t padlen = next_mult_of_16(enc_len + 2);
+//    (void) key;
+//    (void) padding_len;
+//    if (!rand_set) {
+//        srand(time(NULL));
+//        rand_set = true;
+//    }
+//    if (padlen > 2)
+//        for (i = 0; i < padlen - 2; i++)
+//            padding[i] = rand();
+//}
+
 void key_set_padding(BACNET_KEY_ENTRY * key,
     int enc_len,
     uint16_t * padding_len,
@@ -159,7 +178,7 @@ void key_set_padding(BACNET_KEY_ENTRY * key,
     int i;
     uint16_t padlen = next_mult_of_16(enc_len + 2);
     (void) key;
-    (void) padding_len;
+    *padding_len = padlen;
     if (!rand_set) {
         srand(time(NULL));
         rand_set = true;
@@ -168,6 +187,7 @@ void key_set_padding(BACNET_KEY_ENTRY * key,
         for (i = 0; i < padlen - 2; i++)
             padding[i] = rand();
 }
+
 
 BACNET_SECURITY_RESPONSE_CODE bacnet_master_key_set(BACNET_SET_MASTER_KEY *
     key)
