@@ -1,7 +1,6 @@
 *.o
 /bin
 .cproject
-.project
 .settings/
 lib/libbacnet.a
 
