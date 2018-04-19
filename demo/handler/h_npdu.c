@@ -86,17 +86,21 @@ void npdu_handler(
 
         		uint32_t apdu_len_remaining = pdu_len - apdu_offset;
         		BACNET_SECURITY_WRAPPER wrapper = { 0 };
+        		uint8_t test[MAX_APDU];
+       		    wrapper.service_data = test;
 
         		printf("pdu_len: %d\n", pdu_len);
         		printf("apdu_offset: %d\n", apdu_offset);
         		printf("apdu_len_remaining: %d\n", apdu_len_remaining);
 
-        		printf("%d\n", decode_security_wrapper_safe(1, &pdu[apdu_offset], apdu_len_remaining, &wrapper));
+        		int return_val = decode_security_wrapper_safe(1, &pdu[apdu_offset], apdu_len_remaining, &wrapper);
 
-        		printf("%d\n", wrapper.service_data_len);
+        		printf("Return Value %d\n", return_val);
+
+        		printf("Service Data Length: %d\n", wrapper.service_data_len);
 
         		apdu_handler(src, &wrapper.service_data[2],
-        				wrapper.service_data_len);
+        				(wrapper.service_data_len - 2));
         	}
         	else{
 #if PRINT_ENABLED
