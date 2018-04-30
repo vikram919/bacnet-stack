@@ -188,7 +188,8 @@ void key_set_padding(BACNET_KEY_ENTRY * key,
     /* in the future, we should check for the block size, but for now it is always 16 */
     int i;
 
-    // Done FIXME(bb327) padlen = next_mult_of_16(enc_len + 2) - enc_len
+    // padlen = the difference of current size and necessary size to be a multiple of blocklenght
+    // before fix it was the necessary size
     // remember: last 2 octets are used for padding length incl. length field itself
     uint16_t padlen = next_mult_of_16(enc_len + 2) - enc_len;
     (void) key;
