@@ -115,8 +115,13 @@ int key_encrypt_msg(BACNET_KEY_ENTRY * key,
         default:
             return -1;
     }
+    // disable auto padding of openSSL
+    // according to the openSSl documentation, padding is always added (even if msg is a multiple of blocksize)
+    // this contradicts the requirements imposed by BACnet security architecture 24.2.13
+    // as we already padded the message to be a multiple of blocksize, openSSl-padding can be turned off
+    EVP_CIPHER_CTX_set_padding(&evp_ctx, 0);
     EVP_EncryptUpdate(&evp_ctx, tmp_buf, &outlen, msg, msg_len);
-    EVP_EncryptFinal(&evp_ctx, &msg[outlen], &outlen2);
+    EVP_EncryptFinal_ex(&evp_ctx, &msg[outlen], &outlen2);
     EVP_CIPHER_CTX_cleanup(&evp_ctx);
     if (outlen2 != 0)
         return -1;
@@ -139,9 +144,15 @@ bool key_decrypt_msg(BACNET_KEY_ENTRY * key,
         default:
             return false;
     }
+    // disable auto padding of openSSL
+    // according to the openSSl documentation, padding is always added (even if msg is a multiple of blocksize)
+    // this contradicts the requirements imposed by BACnet security architecture 24.2.13
+    // as we already padded the message to be a multiple of blocksize, openSSl-padding can be turned off
+    EVP_CIPHER_CTX_set_padding(&evp_ctx, 0);
+
     if (EVP_DecryptUpdate(&evp_ctx, tmp_buf, &outlen, msg, msg_len) == 0)
         return false;
-    if (EVP_DecryptFinal(&evp_ctx, &msg[outlen], &outlen2) == 0)
+    if (EVP_DecryptFinal_ex(&evp_ctx, &msg[outlen], &outlen2) == 0)
         return false;
     EVP_CIPHER_CTX_cleanup(&evp_ctx);
     if (outlen2 != 0)
@@ -176,7 +187,10 @@ void key_set_padding(BACNET_KEY_ENTRY * key,
 {
     /* in the future, we should check for the block size, but for now it is always 16 */
     int i;
-    uint16_t padlen = next_mult_of_16(enc_len + 2);
+
+    // Done FIXME(bb327) padlen = next_mult_of_16(enc_len + 2) - enc_len
+    // remember: last 2 octets are used for padding length incl. length field itself
+    uint16_t padlen = next_mult_of_16(enc_len + 2) - enc_len;
     (void) key;
     *padding_len = padlen;
     if (!rand_set) {

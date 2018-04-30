@@ -121,7 +121,7 @@ uint8_t Send_Read_Property_Request_Address(
         wrapper.payload_net_or_bvll_flag = false;
 
 //        wrapper.encrypted_flag = true;
-        wrapper.encrypted_flag = false;
+        wrapper.encrypted_flag = true;
         // bit 5: reserved, shall be zero
         wrapper.authentication_flag = false;
         wrapper.do_not_unwrap_flag = false;
