@@ -452,7 +452,7 @@ int decode_security_wrapper_safe(int bytes_before,
                 (uint32_t)(real_len - enc_begin), wrapper->signature)) {
             return -SEC_RESP_MALFORMED_MESSAGE;
         }
-        curr += decode_unsigned16(&apdu[real_len - 2], &wrapper->padding_len);
+        /*curr += */decode_unsigned16(&apdu[real_len - 2], &wrapper->padding_len);
         real_len -= wrapper->padding_len;
         memcpy(wrapper->padding, &apdu[wrapper->padding_len],
             wrapper->padding_len - 2);
