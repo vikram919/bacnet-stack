@@ -58,6 +58,7 @@
 
 #if SECURITY_ENABLED
 #include "bacsec.h"
+#include "security.h"
 #endif
 
 // key

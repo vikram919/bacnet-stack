@@ -43,6 +43,15 @@
 #include "txbuf.h"
 #include "client.h"
 
+#define SECURITY_ENABLED 1
+
+#if SECURITY_ENABLED
+
+#include "bacsec.h"
+#include "security.h"
+
+#endif
+
 /** @file s_wp.c  Send a Write Property request. */
 
 /** returns the invoke ID for confirmed request, or zero on failure */
@@ -56,7 +65,7 @@ uint8_t Send_Write_Property_Request_Data(
     uint8_t priority,
     uint32_t array_index)
 {
-    BACNET_ADDRESS dest;
+    BACNET_ADDRESS dest = {0};
     BACNET_ADDRESS my_address;
     unsigned max_apdu = 0;
     uint8_t invoke_id = 0;
@@ -79,6 +88,10 @@ uint8_t Send_Write_Property_Request_Data(
         /* encode the NPDU portion of the packet */
         datalink_get_my_address(&my_address);
         npdu_encode_npdu_data(&npdu_data, true, MESSAGE_PRIORITY_NORMAL);
+
+#if SECURITY_ENABLED
+        set_npdu_data(&npdu_data, NETWORK_MESSAGE_SECURITY_PAYLOAD);
+#endif
         pdu_len =
             npdu_encode_pdu(&Handler_Transmit_Buffer[0], &dest, &my_address,
             &npdu_data);
@@ -91,9 +104,28 @@ uint8_t Send_Write_Property_Request_Data(
         memcpy(&data.application_data[0], &application_data[0],
             application_data_len);
         data.priority = priority;
+
+#if SECURITY_ENABLED
+        // setup security wrapper fields
+        set_security_wrapper_fields_static(device_id, &dest, &my_address);
+
+        // FIXME: no initialization leads to error in *_encode_apdu
+        uint8_t test[MAX_APDU];
+        wrapper.service_data = test;
+        wrapper.service_data_len =
+        		(uint8_t)wp_encode_apdu(&wrapper.service_data[2], invoke_id, &data);
+                encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
+
+        wrapper.service_data_len += 2;
+        wrapper.service_type = wrapper.service_data[2];
+
+        len =
+           	encode_security_wrapper(1, &Handler_Transmit_Buffer[pdu_len], &wrapper);
+#else
         len =
             wp_encode_apdu(&Handler_Transmit_Buffer[pdu_len], invoke_id,
             &data);
+#endif
         pdu_len += len;
         /* will it fit in the sender?
            note: if there is a bottleneck router in between

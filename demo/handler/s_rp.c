@@ -43,9 +43,14 @@
 #include "txbuf.h"
 #include "client.h"
 
-#include "bacsec.h"
-
 #define SECURITY_ENABLED 1
+
+#if SECURITY_ENABLED
+
+#include "bacsec.h"
+#include "security.h"
+
+#endif
 
 /** @file s_rp.c  Send Read Property request. */
 
@@ -80,11 +85,6 @@ uint8_t Send_Read_Property_Request_Address(
     BACNET_READ_PROPERTY_DATA data;
     BACNET_NPDU_DATA npdu_data;
 
-#if SECURITY_ENABLED
-    uint8_t test[MAX_APDU];
-#endif
-
-
     if (!dcc_communication_enabled()) {
         return 0;
     }
@@ -100,10 +100,8 @@ uint8_t Send_Read_Property_Request_Address(
         npdu_encode_npdu_data(&npdu_data, true, MESSAGE_PRIORITY_NORMAL);
 
 #if SECURITY_ENABLED
-        npdu_data.network_layer_message = true;
-        npdu_data.network_message_type = NETWORK_MESSAGE_SECURITY_PAYLOAD;
+        set_npdu_data(&npdu_data, NETWORK_MESSAGE_SECURITY_PAYLOAD);
 #endif
-
         pdu_len =
             npdu_encode_pdu(&Handler_Transmit_Buffer[0], dest, &my_address,
             &npdu_data);
@@ -115,58 +113,12 @@ uint8_t Send_Read_Property_Request_Address(
         data.array_index = array_index;
 
 #if SECURITY_ENABLED
-        BACNET_SECURITY_WRAPPER wrapper;
 
-        // control octet:
-        wrapper.payload_net_or_bvll_flag = false;
+        // setup security wrapper fields
+        set_security_wrapper_fields_static(device_id, dest, &my_address);
 
-//        wrapper.encrypted_flag = true;
-        wrapper.encrypted_flag = true;
-        // bit 5: reserved, shall be zero
-        wrapper.authentication_flag = false;
-        wrapper.do_not_unwrap_flag = false;
-        wrapper.do_not_decrypt_flag = false;
-        wrapper.non_trusted_source_flag = false;
-        wrapper.secured_by_router_flag = false;
-
-
-        // key identifier: 0 indicates device master key
-        wrapper.key_identifier = KIKN_DEVICE_MASTER;
-//        wrapper.key_identifier = KIKN_GENERAL_NETWORK_ACCESS;
-        wrapper.key_revision = 0;
-        // ???
-        wrapper.source_device_instance = 1;
-        // message id: 32 bit integer, increased by 1 for each message
-        wrapper.message_id = 1;
-        // timestamp: standard UNIX timestamp
-        wrapper.timestamp = time(NULL);
-        wrapper.destination_device_instance = device_id;
-        // destination and source network information
-
-
-        wrapper.dnet = dest->net;
-//        wrapper.dlen = dest->len;
-        wrapper.dlen = sizeof(dest->adr);
-        memcpy(wrapper.dadr, dest->adr, wrapper.dlen);
-        wrapper.snet = my_address.net;
-//        wrapper.slen = my_address.len;
-        wrapper.slen = sizeof(my_address.adr);
-        memcpy(wrapper.sadr, my_address.adr, wrapper.slen);
-
-        // ???
-        wrapper.authentication_mechanism = 0;
-        wrapper.user_id = 0;
-        wrapper.user_role = 0;
-
-//	    wrapper.authentication_data_length =
-//  	wrapper.vendor_id =
-//		wrapper.authentication_data =
-//
-        // encode service data
-        data.object_type = object_type;
-        data.object_instance = object_instance;
-        data.object_property = object_property;
-        data.array_index = array_index;
+        // FIXME: no initialization leads to error in rp_encode_apdu
+        uint8_t test[MAX_APDU];
 
         wrapper.service_data = test;
         wrapper.service_data_len =
@@ -175,14 +127,7 @@ uint8_t Send_Read_Property_Request_Address(
 
         wrapper.service_data_len += 2;
 
-        // memcpy(&wrapper.service_data, &apdu, wrapper.service_data_len);
-        // First octet of service data ??
-
         wrapper.service_type = wrapper.service_data[2];
-
-//      wrapper.padding_len =
-//      wrapper.padding =
-//      wrapper.signature =
 
         len =
         	encode_security_wrapper(1, &Handler_Transmit_Buffer[pdu_len], &wrapper);

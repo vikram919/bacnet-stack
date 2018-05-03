@@ -82,6 +82,7 @@ CORE_SRC = \
 	$(BACNET_CORE)/credential_authentication_factor.c \
 	$(BACNET_CORE)/version.c \
 	$(BACNET_CORE)/bacsec.c \
+	$(BACNET_CORE)/security.c \
 	$(BACNET_PORT_DIR)/bacsec_linux.c
 
 HANDLER_SRC = \
