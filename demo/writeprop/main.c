@@ -269,6 +269,24 @@ int main(
     uint8_t context_tag = 0;
     int argi = 0;
 
+#if SECURITY_ENABLED
+    // set master key
+    BACNET_KEY_ENTRY key;
+    //key.key_identifier = KIKN_GENERAL_NETWORK_ACCESS;
+    key.key_identifier = KIKN_DEVICE_MASTER;
+    key.key_len = sizeof(KEY);
+    memcpy(key.key, &KEY, sizeof(KEY));
+
+    BACNET_SET_MASTER_KEY master;
+
+    memcpy(&master, &key, sizeof(BACNET_KEY_ENTRY));
+
+    if(bacnet_master_key_set(&master) != SEC_RESP_SUCCESS)
+    	return 0;
+
+#endif
+
+
     /* print help if requested */
     for (argi = 1; argi < argc; argi++) {
         if (strcmp(argv[argi], "--help") == 0) {

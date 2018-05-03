@@ -106,11 +106,13 @@ uint8_t Send_Write_Property_Request_Data(
         data.priority = priority;
 
 #if SECURITY_ENABLED
+
         // setup security wrapper fields
         set_security_wrapper_fields_static(device_id, &dest, &my_address);
 
         // FIXME: no initialization leads to error in *_encode_apdu
         uint8_t test[MAX_APDU];
+
         wrapper.service_data = test;
         wrapper.service_data_len =
         		(uint8_t)wp_encode_apdu(&wrapper.service_data[2], invoke_id, &data);
