@@ -44,6 +44,15 @@
 #include "txbuf.h"
 #include "client.h"
 
+#define SECURITY_ENABLED 1
+
+#if SECURITY_ENABLED
+
+#include "bacsec.h"
+#include "security.h"
+
+#endif
+
 /** @file s_whois.c  Send a Who-Is request. */
 
 /** Send a Who-Is request to a remote network for a specific device, a range,
@@ -71,13 +80,39 @@ void Send_WhoIs_To_Network(
     /* encode the NPDU portion of the packet */
     npdu_encode_npdu_data(&npdu_data, false, MESSAGE_PRIORITY_NORMAL);
 
+#if SECURITY_ENABLED
+        set_npdu_data(&npdu_data, NETWORK_MESSAGE_SECURITY_PAYLOAD);
+#endif
     pdu_len =
         npdu_encode_pdu(&Handler_Transmit_Buffer[0], target_address,
         &my_address, &npdu_data);
+#if SECURITY_ENABLED
+
+    // setup security wrapper fields
+    // FIXME: device id is always 1
+    set_security_wrapper_fields_static(1, target_address, &my_address);
+
+    // FIXME: no initialization leads to error in *_encode_apdu
+    uint8_t test[MAX_APDU];
+    wrapper.service_data = test;
+
+    wrapper.service_data_len = whois_encode_apdu(&wrapper.service_data[2], low_limit,
+            high_limit);
+    printf("Service data len: %d\n", wrapper.service_data_len);
+    encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
+
+    wrapper.service_data_len += 2;
+    wrapper.service_type = wrapper.service_data[2];
+
+    len =
+        encode_security_wrapper(1, &Handler_Transmit_Buffer[pdu_len], &wrapper);
+
+#else
     /* encode the APDU portion of the packet */
     len =
         whois_encode_apdu(&Handler_Transmit_Buffer[pdu_len], low_limit,
         high_limit);
+#endif
     pdu_len += len;
     bytes_sent =
         datalink_send_pdu(target_address, &npdu_data,

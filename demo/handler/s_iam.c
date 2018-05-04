@@ -42,6 +42,15 @@
 #include "handlers.h"
 #include "client.h"
 
+#define SECURITY_ENABLED 1
+
+#if SECURITY_ENABLED
+
+#include "bacsec.h"
+#include "security.h"
+
+#endif
+
 /** @file s_iam.c  Send an I-Am message. */
 
 /** Send a I-Am request to a remote network for a specific device.
@@ -68,14 +77,39 @@ void Send_I_Am_To_Network(
     /* encode the NPDU portion of the packet */
     npdu_encode_npdu_data(&npdu_data, false, MESSAGE_PRIORITY_NORMAL);
 
+#if SECURITY_ENABLED
+        set_npdu_data(&npdu_data, NETWORK_MESSAGE_SECURITY_PAYLOAD);
+#endif
     pdu_len =
         npdu_encode_pdu(&Handler_Transmit_Buffer[0], target_address,
         &my_address, &npdu_data);
-    /* encode the APDU portion of the packet */
+
+#if SECURITY_ENABLED
+
+    // setup security wrapper fields
+    // FIXME: device id is always 1
+    set_security_wrapper_fields_static(device_id, target_address, &my_address);
+
+    // FIXME: no initialization leads to error in *_encode_apdu
+    uint8_t test[MAX_APDU];
+    wrapper.service_data = test;
+
+    wrapper.service_data_len = iam_encode_apdu(&Handler_Transmit_Buffer[pdu_len],
+            device_id, max_apdu, segmentation, vendor_id);
+
+    encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
+
+    wrapper.service_data_len += 2;
+    wrapper.service_type = wrapper.service_data[2];
+
+    len =
+    	encode_security_wrapper(1, &Handler_Transmit_Buffer[pdu_len], &wrapper);
+#else
     /* encode the APDU portion of the packet */
     len =
         iam_encode_apdu(&Handler_Transmit_Buffer[pdu_len],
         device_id, max_apdu, segmentation, vendor_id);
+#endif
     pdu_len += len;
     bytes_sent =
         datalink_send_pdu(target_address, &npdu_data,
