@@ -94,7 +94,7 @@ void Send_I_Am_To_Network(
     uint8_t test[MAX_APDU];
     wrapper.service_data = test;
 
-    wrapper.service_data_len = iam_encode_apdu(&Handler_Transmit_Buffer[pdu_len],
+    wrapper.service_data_len = iam_encode_apdu(&wrapper.service_data[2],
             device_id, max_apdu, segmentation, vendor_id);
 
     encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);

@@ -51,6 +51,30 @@
 #include "txbuf.h"
 #include "dlenv.h"
 
+#define SECURITY_ENABLED 1
+
+#if SECURITY_ENABLED
+#include "bacsec.h"
+#include "security.h"
+#endif
+
+// key
+uint8_t KEY[] = {
+    		(uint8_t) 0x97, (uint8_t) 0xEC, (uint8_t) 0x8A, (uint8_t) 0xEF,
+  			(uint8_t) 0x9E, (uint8_t) 0x2C, (uint8_t) 0x94, (uint8_t) 0x47,
+   			(uint8_t) 0x96, (uint8_t) 0xEB, (uint8_t) 0x13, (uint8_t) 0x5A,
+  			(uint8_t) 0x11, (uint8_t) 0x55, (uint8_t) 0xB0, (uint8_t) 0x4D,
+   			// 256 bit SHA-256
+   			(uint8_t) 0xB0, (uint8_t) 0x54, (uint8_t) 0xFB, (uint8_t) 0xE5,
+   			(uint8_t) 0xAA, (uint8_t) 0x53, (uint8_t) 0xB0, (uint8_t) 0xD9,
+  			(uint8_t) 0x05, (uint8_t) 0x26, (uint8_t) 0x3F, (uint8_t) 0x10,
+   			(uint8_t) 0x3A, (uint8_t) 0xD0, (uint8_t) 0x3D, (uint8_t) 0x65,
+   			(uint8_t) 0xEE, (uint8_t) 0x2D, (uint8_t) 0x92, (uint8_t) 0x68,
+   			(uint8_t) 0xA9, (uint8_t) 0xAB, (uint8_t) 0x23, (uint8_t) 0x3B,
+   			(uint8_t) 0xE5, (uint8_t) 0x37, (uint8_t) 0x66, (uint8_t) 0x90,
+   			(uint8_t) 0x73, (uint8_t) 0xC9, (uint8_t) 0x64, (uint8_t) 0x75
+};
+
 /* buffer used for receive */
 static uint8_t Rx_Buf[MAX_MPDU] = { 0 };
 
@@ -271,6 +295,22 @@ int main(
     uint16_t my_max_apdu = 0;
     int argi = 0;
     char *filename = NULL;
+
+#if SECURITY_ENABLED
+    // set master key
+    BACNET_KEY_ENTRY key;
+    //key.key_identifier = KIKN_GENERAL_NETWORK_ACCESS;
+    key.key_identifier = KIKN_DEVICE_MASTER;
+    key.key_len = sizeof(KEY);
+    memcpy(key.key, &KEY, sizeof(KEY));
+
+    BACNET_SET_MASTER_KEY master;
+
+    memcpy(&master, &key, sizeof(BACNET_KEY_ENTRY));
+
+    if(bacnet_master_key_set(&master) != SEC_RESP_SUCCESS)
+    	return 0;
+#endif
 
     /* print help if requested */
     filename = filename_remove_path(argv[0]);

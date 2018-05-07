@@ -293,7 +293,6 @@ int main(
 
     if(bacnet_master_key_set(&master) != SEC_RESP_SUCCESS)
     	return 0;
-
 #endif
 
     filename = filename_remove_path(argv[0]);

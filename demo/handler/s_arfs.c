@@ -43,6 +43,15 @@
 #include "txbuf.h"
 #include "client.h"
 
+#define SECURITY_ENABLED 1
+
+#if SECURITY_ENABLED
+
+#include "bacsec.h"
+#include "security.h"
+
+#endif
+
 /** @file s_arfs.c  Send part of an Atomic Read File Stream. */
 
 uint8_t Send_Atomic_Read_File_Stream(
@@ -81,12 +90,38 @@ uint8_t Send_Atomic_Read_File_Stream(
         /* encode the NPDU portion of the packet */
         datalink_get_my_address(&my_address);
         npdu_encode_npdu_data(&npdu_data, true, MESSAGE_PRIORITY_NORMAL);
+
+#if SECURITY_ENABLED
+        set_npdu_data(&npdu_data, NETWORK_MESSAGE_SECURITY_PAYLOAD);
+#endif
+
         pdu_len =
             npdu_encode_pdu(&Handler_Transmit_Buffer[0], &dest, &my_address,
             &npdu_data);
+
+#if SECURITY_ENABLED
+        // setup security wrapper fields
+        // FIXME: device id is always 1
+        set_security_wrapper_fields_static(device_id, &dest, &my_address);
+
+        uint8_t test[MAX_APDU];
+        wrapper.service_data = test;
+
+        wrapper.service_data_len = arf_encode_apdu(&wrapper.service_data[2],
+                                invoke_id, &data);
+
+        encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
+
+        wrapper.service_data_len += 2;
+        wrapper.service_type = wrapper.service_data[2];
+
+        len =
+           	encode_security_wrapper(1, &Handler_Transmit_Buffer[pdu_len], &wrapper);
+#else
         len =
             arf_encode_apdu(&Handler_Transmit_Buffer[pdu_len], invoke_id,
             &data);
+#endif
         pdu_len += len;
         /* will the APDU fit the target device?
            note: if there is a bottleneck router in between
