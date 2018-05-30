@@ -90,15 +90,9 @@ void npdu_handler(
         		uint8_t test[MAX_APDU];
        		    wrapper.service_data = test;
 
-        		printf("pdu_len: %d\n", pdu_len);
-        		printf("apdu_offset: %d\n", apdu_offset);
-        		printf("apdu_len_remaining: %d\n", apdu_len_remaining);
+           		decode_security_wrapper_safe(1, &pdu[apdu_offset], apdu_len_remaining, &wrapper);
 
-        		decode_security_wrapper_safe(1, &pdu[apdu_offset], apdu_len_remaining, &wrapper);
-
-        		printf("Service Data Length: %d\n", wrapper.service_data_len);
-
-        		apdu_handler(src, &wrapper.service_data[2],
+           		apdu_handler(src, &wrapper.service_data[2],
         				(wrapper.service_data_len - 2));
         	}
         	else{
