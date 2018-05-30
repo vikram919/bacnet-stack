@@ -43,6 +43,15 @@
 #include "txbuf.h"
 #include "client.h"
 
+#define SECURITY_ENABLED 1
+
+#if SECURITY_ENABLED
+
+#include "bacsec.h"
+#include "security.h"
+
+#endif
+
 /** @file s_ihave.c  Send an I-Have (property) message. */
 
 /** Broadcast an I Have message.
@@ -75,6 +84,11 @@ void Send_I_Have(
     datalink_get_broadcast_address(&dest);
     /* encode the NPDU portion of the packet */
     npdu_encode_npdu_data(&npdu_data, false, MESSAGE_PRIORITY_NORMAL);
+
+#if SECURITY_ENABLED
+        set_npdu_data(&npdu_data, NETWORK_MESSAGE_SECURITY_PAYLOAD);
+#endif
+
     pdu_len =
         npdu_encode_pdu(&Handler_Transmit_Buffer[0], &dest, &my_address,
         &npdu_data);
@@ -85,7 +99,28 @@ void Send_I_Have(
     data.object_id.type = object_type;
     data.object_id.instance = object_instance;
     characterstring_copy(&data.object_name, object_name);
+
+#if SECURITY_ENABLED
+    // setup security wrapper fields
+    // FIXME: device id is always 1
+    set_security_wrapper_fields_static(device_id, &dest, &my_address);
+
+    // FIXME: no initialization leads to error in *_encode_apdu
+    uint8_t test[MAX_APDU];
+    wrapper.service_data = test;
+
+    wrapper.service_data_len = ihave_encode_apdu(&wrapper.service_data[2], &data);
+    encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
+
+       wrapper.service_data_len += 2;
+       wrapper.service_type = wrapper.service_data[2];
+
+       len =
+       	encode_security_wrapper(1, &Handler_Transmit_Buffer[pdu_len], &wrapper);
+
+#else
     len = ihave_encode_apdu(&Handler_Transmit_Buffer[pdu_len], &data);
+#endif
     pdu_len += len;
     /* send the data */
     bytes_sent =

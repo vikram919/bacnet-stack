@@ -98,7 +98,7 @@ void Send_WhoIs_To_Network(
 
     wrapper.service_data_len = whois_encode_apdu(&wrapper.service_data[2], low_limit,
             high_limit);
-    printf("Service data len: %d\n", wrapper.service_data_len);
+
     encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
 
     wrapper.service_data_len += 2;

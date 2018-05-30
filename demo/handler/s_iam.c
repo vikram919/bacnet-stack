@@ -142,12 +142,38 @@ int iam_encode_pdu(
     datalink_get_broadcast_address(dest);
     /* encode the NPDU portion of the packet */
     npdu_encode_npdu_data(npdu_data, false, MESSAGE_PRIORITY_NORMAL);
+
+#if SECURITY_ENABLED
+        set_npdu_data(npdu_data, NETWORK_MESSAGE_SECURITY_PAYLOAD);
+#endif
+
     pdu_len = npdu_encode_pdu(&buffer[0], dest, &my_address, npdu_data);
 
+#if SECURITY_ENABLED
+    // setup security wrapper fields
+    // FIXME: device id is always 1
+    set_security_wrapper_fields_static(Device_Object_Instance_Number(), dest, &my_address);
+
+    // FIXME: no initialization leads to error in *_encode_apdu
+    uint8_t test[MAX_APDU];
+    wrapper.service_data = test;
+
+    wrapper.service_data_len = iam_encode_apdu(&wrapper.service_data[2],
+        		Device_Object_Instance_Number(), MAX_APDU, SEGMENTATION_NONE, Device_Vendor_Identifier());
+
+    encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
+
+    wrapper.service_data_len += 2;
+    wrapper.service_type = wrapper.service_data[2];
+
+    len =
+      	encode_security_wrapper(1, &buffer[pdu_len], &wrapper);
+#else
     /* encode the APDU portion of the packet */
     len =
         iam_encode_apdu(&buffer[pdu_len], Device_Object_Instance_Number(),
         MAX_APDU, SEGMENTATION_NONE, Device_Vendor_Identifier());
+#endif
     pdu_len += len;
 
     return pdu_len;
@@ -216,11 +242,41 @@ int iam_unicast_encode_pdu(
     datalink_get_my_address(&my_address);
     /* encode the NPDU portion of the packet */
     npdu_encode_npdu_data(npdu_data, false, MESSAGE_PRIORITY_NORMAL);
+
+#if SECURITY_ENABLED
+        set_npdu_data(&npdu_data, NETWORK_MESSAGE_SECURITY_PAYLOAD);
+#endif
+
     npdu_len = npdu_encode_pdu(&buffer[0], dest, &my_address, npdu_data);
+
+#if SECURITY_ENABLED
+
+    // setup security wrapper fields
+    // FIXME: device id is always 1
+    set_security_wrapper_fields_static(Device_Object_Instance_Number(), dest, &my_address);
+
+    // FIXME: no initialization leads to error in *_encode_apdu
+    uint8_t test[MAX_APDU];
+    wrapper.service_data = test;
+
+    wrapper.service_data_len = iam_encode_apdu(&wrapper.service_data[2],
+               Device_Object_Instance_Number() , MAX_APDU, SEGMENTATION_NONE, Device_Vendor_Identifier());
+
+    encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
+
+    wrapper.service_data_len += 2;
+    wrapper.service_type = wrapper.service_data[2];
+
+    apdu_len =
+    	encode_security_wrapper(1, &Handler_Transmit_Buffer[pdu_len], &wrapper);
+
+#else
+
     /* encode the APDU portion of the packet */
     apdu_len =
         iam_encode_apdu(&buffer[npdu_len], Device_Object_Instance_Number(),
         MAX_APDU, SEGMENTATION_NONE, Device_Vendor_Identifier());
+#endif
     pdu_len = npdu_len + apdu_len;
 
     return pdu_len;
