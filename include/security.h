@@ -23,6 +23,8 @@ int set_security_wrapper_fields_static(uint32_t device_id,
 	BACNET_ADDRESS * dest,
 	BACNET_ADDRESS * src);
 
+int initialize_security_wrapper(void);
+
 // TODO: implement function with file input
 //int set_security_wrapper_fields_file(FILE *file,
 //	uint32_t device_id,

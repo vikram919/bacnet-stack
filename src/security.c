@@ -31,23 +31,9 @@ int set_security_wrapper_fields_static(uint32_t device_id,
 	if(!src)
 		return -1;
 
-	/* set bits of control octet */
-    wrapper.payload_net_or_bvll_flag = false;
-    wrapper.encrypted_flag = true;
-    // bit 5: reserved, shall be zero
-    wrapper.authentication_flag = false;
-    wrapper.do_not_unwrap_flag = false;
-    wrapper.do_not_decrypt_flag = false;
-    wrapper.non_trusted_source_flag = false;
-    wrapper.secured_by_router_flag = false;
+	// increment message id counter
+	wrapper.message_id++;
 
-    // key identifier: 0 indicates device master key
-    wrapper.key_identifier = KIKN_DEVICE_MASTER;
-    wrapper.key_revision = 0;
-    wrapper.source_device_instance = 1;
-    // message id: 32 bit integer, increased by 1 for each message
-    // for now it is always 1
-    wrapper.message_id = 1;
     // timestamp: standard UNIX timestamp
     wrapper.timestamp = time(NULL);
     wrapper.destination_device_instance = device_id;
@@ -57,15 +43,39 @@ int set_security_wrapper_fields_static(uint32_t device_id,
     wrapper.dlen = sizeof(dest->adr);
     memcpy(wrapper.dadr, dest->adr, wrapper.dlen);
     wrapper.snet = src->net;
-//        wrapper.slen = my_address.len;
+    // wrapper.slen = my_address.len;
     wrapper.slen = sizeof(src->adr);
     memcpy(wrapper.sadr, src->adr, wrapper.slen);
-
-    wrapper.authentication_mechanism = 0;
-    wrapper.user_id = 0;
-    wrapper.user_role = 0;
 
 	return 0;
 }
 
+int initialize_security_wrapper() {
+	
+	/* set bits of control octet */
+	wrapper.payload_net_or_bvll_flag = false;
+	wrapper.encrypted_flag = true;
+	// bit 5: reserved, shall be zero
+	wrapper.authentication_flag = false;
+	wrapper.do_not_unwrap_flag = false;
+	wrapper.do_not_decrypt_flag = false;
+	wrapper.non_trusted_source_flag = false;
+	wrapper.secured_by_router_flag = false;
+
+	// key identifier: 0 indicates device master key
+	wrapper.key_identifier = KIKN_DEVICE_MASTER;
+	wrapper.key_revision = 0;
+
+	wrapper.source_device_instance = 1;
+	// message id: 32 bit integer, increased by 1 for each message
+	// for now it is always 1
+	wrapper.message_id = 0;
+
+	// set authentication data
+	wrapper.authentication_mechanism = 0;
+	wrapper.user_id = 0;
+	wrapper.user_role = 0;
+
+	return 0;
+}
 

@@ -67,6 +67,7 @@
 #define SECURITY_ENABLED 1
 #if SECURITY_ENABLED
 #include "bacsec.h"
+#include "security.h"
 #endif
 
 /** @file server/main.c  Example server application using the BACnet Stack. */
@@ -226,6 +227,8 @@ int main(
 
     if(bacnet_master_key_set(&master) != SEC_RESP_SUCCESS)
     	return 0;
+
+    initialize_security_wrapper();
 
 #endif
 

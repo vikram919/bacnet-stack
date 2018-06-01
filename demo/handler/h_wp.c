@@ -40,6 +40,15 @@
 #include "device.h"
 #include "handlers.h"
 
+#define SECURITY_ENABLED 1
+
+#if SECURITY_ENABLED
+
+#include "bacsec.h"
+#include "security.h"
+
+#endif
+
 /** @file h_wp.c  Handles Write Property requests. */
 
 
@@ -77,6 +86,11 @@ void handler_write_property(
     /* encode the NPDU portion of the packet */
     datalink_get_my_address(&my_address);
     npdu_encode_npdu_data(&npdu_data, false, MESSAGE_PRIORITY_NORMAL);
+
+#if SECURITY_ENABLED
+        set_npdu_data(&npdu_data, NETWORK_MESSAGE_SECURITY_PAYLOAD);
+#endif
+
     pdu_len =
         npdu_encode_pdu(&Handler_Transmit_Buffer[0], src, &my_address,
         &npdu_data);
@@ -84,10 +98,36 @@ void handler_write_property(
     fprintf(stderr, "WP: Received Request!\n");
 #endif
     if (service_data->segmented_message) {
-        len =
+
+#if SECURITY_ENABLED
+    	// setup security wrapper fields
+    	// FIXME: device id is always 1
+    	set_security_wrapper_fields_static(1, src, &my_address);
+
+    	// FIXME: no initialization leads to error in *_encode_apdu
+    	uint8_t test[MAX_APDU];
+    	wrapper.service_data = test;
+
+    	wrapper.service_data_len = abort_encode_apdu(&wrapper.service_data[2],
+				service_data->invoke_id, ABORT_REASON_SEGMENTATION_NOT_SUPPORTED,
+				true);
+
+    	encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
+
+    	wrapper.service_data_len += 2;
+    	wrapper.service_type = wrapper.service_data[2];
+
+    	len =
+    		encode_security_wrapper(1, &Handler_Transmit_Buffer[pdu_len], &wrapper);
+
+#else
+    	len =
             abort_encode_apdu(&Handler_Transmit_Buffer[pdu_len],
             service_data->invoke_id, ABORT_REASON_SEGMENTATION_NOT_SUPPORTED,
             true);
+
+#endif
+
 #if PRINT_ENABLED
         fprintf(stderr, "WP: Segmented message.  Sending Abort!\n");
 #endif
@@ -107,26 +147,102 @@ void handler_write_property(
 #endif
     /* bad decoding or something we didn't understand - send an abort */
     if (len <= 0) {
+
+#if SECURITY_ENABLED
+
+    	// setup security wrapper fields
+    	// FIXME: device id is always 1
+    	set_security_wrapper_fields_static(1, src, &my_address);
+
+    	// FIXME: no initialization leads to error in *_encode_apdu
+    	uint8_t test[MAX_APDU];
+    	wrapper.service_data = test;
+
+    	wrapper.service_data_len = abort_encode_apdu(&wrapper.service_data[2],
+    			service_data->invoke_id, ABORT_REASON_OTHER, true);
+
+    	encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
+
+    	wrapper.service_data_len += 2;
+    	wrapper.service_type = wrapper.service_data[2];
+
+    	len =
+    		encode_security_wrapper(1, &Handler_Transmit_Buffer[pdu_len], &wrapper);
+
+#else
         len =
             abort_encode_apdu(&Handler_Transmit_Buffer[pdu_len],
             service_data->invoke_id, ABORT_REASON_OTHER, true);
+#endif
+
 #if PRINT_ENABLED
         fprintf(stderr, "WP: Bad Encoding. Sending Abort!\n");
 #endif
         goto WP_ABORT;
     }
     if (Device_Write_Property(&wp_data)) {
-        len =
+
+#if SECURITY_ENABLED
+    	// setup security wrapper fields
+    	// FIXME: device id is always 1
+    	set_security_wrapper_fields_static(1, src, &my_address);
+
+    	// FIXME: no initialization leads to error in *_encode_apdu
+    	uint8_t test[MAX_APDU];
+    	wrapper.service_data = test;
+
+    	wrapper.service_data_len =
+    			encode_simple_ack(&wrapper.service_data[2],
+    			service_data->invoke_id, SERVICE_CONFIRMED_WRITE_PROPERTY);
+
+    	encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
+
+    	wrapper.service_data_len += 2;
+    	wrapper.service_type = wrapper.service_data[2];
+
+    	len =
+    		encode_security_wrapper(1, &Handler_Transmit_Buffer[pdu_len], &wrapper);
+
+#else
+    	len =
             encode_simple_ack(&Handler_Transmit_Buffer[pdu_len],
             service_data->invoke_id, SERVICE_CONFIRMED_WRITE_PROPERTY);
+#endif
+
 #if PRINT_ENABLED
         fprintf(stderr, "WP: Sending Simple Ack!\n");
 #endif
     } else {
-        len =
+
+#if SECURITY_ENABLED
+
+    	// setup security wrapper fields
+    	// FIXME: device id is always 1
+    	set_security_wrapper_fields_static(1, src, &my_address);
+
+    	// FIXME: no initialization leads to error in *_encode_apdu
+    	uint8_t test[MAX_APDU];
+    	wrapper.service_data = test;
+
+    	wrapper.service_data_len = bacerror_encode_apdu(&wrapper.service_data[2],
+    					service_data->invoke_id, SERVICE_CONFIRMED_WRITE_PROPERTY,
+    					wp_data.error_class, wp_data.error_code);
+
+    	encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
+
+    	wrapper.service_data_len += 2;
+    	wrapper.service_type = wrapper.service_data[2];
+
+    	len =
+    		encode_security_wrapper(1, &Handler_Transmit_Buffer[pdu_len], &wrapper);
+
+#else
+    	len =
             bacerror_encode_apdu(&Handler_Transmit_Buffer[pdu_len],
             service_data->invoke_id, SERVICE_CONFIRMED_WRITE_PROPERTY,
             wp_data.error_class, wp_data.error_code);
+#endif
+
 #if PRINT_ENABLED
         fprintf(stderr, "WP: Sending Error!\n");
 #endif

@@ -42,6 +42,15 @@
 #include "device.h"
 #include "handlers.h"
 
+#define SECURITY_ENABLED 1
+
+#if SECURITY_ENABLED
+
+#include "bacsec.h"
+#include "security.h"
+
+#endif
+
 /** @file h_rp.c  Handles Read Property requests. */
 
 
@@ -85,6 +94,11 @@ void handler_read_property(
     /* encode the NPDU portion of the packet */
     datalink_get_my_address(&my_address);
     npdu_encode_npdu_data(&npdu_data, false, MESSAGE_PRIORITY_NORMAL);
+
+#if SECURITY_ENABLED
+        set_npdu_data(&npdu_data, NETWORK_MESSAGE_SECURITY_PAYLOAD);
+#endif
+
     npdu_len =
         npdu_encode_pdu(&Handler_Transmit_Buffer[0], src, &my_address,
         &npdu_data);
@@ -116,20 +130,59 @@ void handler_read_property(
         rpdata.object_instance = Device_Object_Instance_Number();
     }
 
+#if SECURITY_ENABLED
+
+    // setup security wrapper fields
+    // FIXME: device id is always 1
+    set_security_wrapper_fields_static(1, src, &my_address);
+
+    // FIXME: no initialization leads to error in *_encode_apdu
+    uint8_t test[MAX_APDU];
+    wrapper.service_data = test;
+
+    wrapper.service_data_len = rp_ack_encode_apdu_init(&wrapper.service_data[2],
+    	        service_data->invoke_id, &rpdata);
+
+    rpdata.application_data = &wrapper.service_data[2 + wrapper.service_data_len];
+    rpdata.application_data_len = sizeof(Handler_Transmit_Buffer) - (npdu_len + service_len + 2);
+
+    len = Device_Read_Property(&rpdata);
+
+        if (len >= 0) {
+            wrapper.service_data_len += len;
+
+            wrapper.service_data_len +=
+            		rp_ack_encode_apdu_object_property_end(&wrapper.service_data[2 + wrapper.service_data_len]);
+
+            encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
+
+            wrapper.service_data_len += 2;
+            wrapper.service_type = wrapper.service_data[2];
+
+            apdu_len =
+            		encode_security_wrapper(1, &Handler_Transmit_Buffer[npdu_len], &wrapper);
+
+#else
+    len =
+        rp_ack_encode_apdu_object_property_end(&Handler_Transmit_Buffer
+        [npdu_len + apdu_len]);
+    apdu_len += len;
+
     apdu_len =
-        rp_ack_encode_apdu_init(&Handler_Transmit_Buffer[npdu_len],
-        service_data->invoke_id, &rpdata);
-    /* configure our storage */
+    		rp_ack_encode_apdu_init(&Handler_Transmit_Buffer[npdu_len],
+            service_data->invoke_id, &rpdata);
+
+        /* configure our storage */
     rpdata.application_data = &Handler_Transmit_Buffer[npdu_len + apdu_len];
     rpdata.application_data_len =
         sizeof(Handler_Transmit_Buffer) - (npdu_len + apdu_len);
+
+
     len = Device_Read_Property(&rpdata);
+
     if (len >= 0) {
         apdu_len += len;
-        len =
-            rp_ack_encode_apdu_object_property_end(&Handler_Transmit_Buffer
-            [npdu_len + apdu_len]);
-        apdu_len += len;
+#endif
         if (apdu_len > service_data->max_resp) {
             /* too big for the sender - send an abort
              * Setting of error code needed here as read property processing may
@@ -163,26 +216,102 @@ void handler_read_property(
   RP_FAILURE:
     if (error) {
         if (len == BACNET_STATUS_ABORT) {
-            apdu_len =
+
+#if SECURITY_ENABLED
+        	// setup security wrapper fields
+        	// FIXME: device id is always 1
+        	set_security_wrapper_fields_static(1, src, &my_address);
+
+        	// FIXME: no initialization leads to error in *_encode_apdu
+        	uint8_t test[MAX_APDU];
+        	wrapper.service_data = test;
+
+        	wrapper.service_data_len = abort_encode_apdu(&wrapper.service_data[2],
+        			service_data->invoke_id,
+					abort_convert_error_code(rpdata.error_code), true);
+
+        	encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
+
+        	wrapper.service_data_len += 2;
+        	wrapper.service_type = wrapper.service_data[2];
+
+        	apdu_len =
+        			encode_security_wrapper(1, &Handler_Transmit_Buffer[npdu_len], &wrapper);
+
+
+#else
+        	apdu_len =
                 abort_encode_apdu(&Handler_Transmit_Buffer[npdu_len],
                 service_data->invoke_id,
                 abort_convert_error_code(rpdata.error_code), true);
+#endif
+
 #if PRINT_ENABLED
             fprintf(stderr, "RP: Sending Abort!\n");
 #endif
         } else if (len == BACNET_STATUS_ERROR) {
-            apdu_len =
+
+#if SECURITY_ENABLED
+        	// setup security wrapper fields
+        	// FIXME: device id is always 1
+        	set_security_wrapper_fields_static(1, src, &my_address);
+
+        	// FIXME: no initialization leads to error in *_encode_apdu
+        	uint8_t test[MAX_APDU];
+        	wrapper.service_data = test;
+
+        	wrapper.service_data_len =
+        			bacerror_encode_apdu(&wrapper.service_data[2],
+        			service_data->invoke_id, SERVICE_CONFIRMED_READ_PROPERTY,
+					rpdata.error_class, rpdata.error_code);
+
+        	encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
+
+        	wrapper.service_data_len += 2;
+        	wrapper.service_type = wrapper.service_data[2];
+
+        	apdu_len =
+        			encode_security_wrapper(1, &Handler_Transmit_Buffer[npdu_len], &wrapper);
+#else
+        	apdu_len =
                 bacerror_encode_apdu(&Handler_Transmit_Buffer[npdu_len],
                 service_data->invoke_id, SERVICE_CONFIRMED_READ_PROPERTY,
                 rpdata.error_class, rpdata.error_code);
+#endif
+
 #if PRINT_ENABLED
             fprintf(stderr, "RP: Sending Error!\n");
 #endif
         } else if (len == BACNET_STATUS_REJECT) {
-            apdu_len =
+
+#if SECURITY_ENABLED
+        	// setup security wrapper fields
+        	// FIXME: device id is always 1
+        	set_security_wrapper_fields_static(1, src, &my_address);
+
+        	// FIXME: no initialization leads to error in *_encode_apdu
+        	uint8_t test[MAX_APDU];
+        	wrapper.service_data = test;
+
+        	wrapper.service_data_len =
+        			reject_encode_apdu(&wrapper.service_data[2],
+        			service_data->invoke_id,
+        			reject_convert_error_code(rpdata.error_code));
+
+        	encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
+
+        	wrapper.service_data_len += 2;
+        	wrapper.service_type = wrapper.service_data[2];
+
+        	apdu_len =
+        			encode_security_wrapper(1, &Handler_Transmit_Buffer[npdu_len], &wrapper);
+#else
+        	apdu_len =
                 reject_encode_apdu(&Handler_Transmit_Buffer[npdu_len],
                 service_data->invoke_id,
                 reject_convert_error_code(rpdata.error_code));
+#endif
+
 #if PRINT_ENABLED
             fprintf(stderr, "RP: Sending Reject!\n");
 #endif

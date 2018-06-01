@@ -284,6 +284,8 @@ int main(
     if(bacnet_master_key_set(&master) != SEC_RESP_SUCCESS)
     	return 0;
 
+    initialize_security_wrapper();
+
 #endif
 
 
