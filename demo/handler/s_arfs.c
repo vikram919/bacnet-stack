@@ -43,8 +43,6 @@
 #include "txbuf.h"
 #include "client.h"
 
-#define SECURITY_ENABLED 1
-
 #if SECURITY_ENABLED
 
 #include "bacsec.h"

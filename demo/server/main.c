@@ -64,7 +64,6 @@
 #include "ucix.h"
 #endif /* defined(BAC_UCI) */
 
-#define SECURITY_ENABLED 1
 #if SECURITY_ENABLED
 #include "bacsec.h"
 #include "security.h"

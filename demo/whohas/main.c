@@ -50,8 +50,6 @@
 #include "txbuf.h"
 #include "dlenv.h"
 
-#define SECURITY_ENABLED 1
-
 #if SECURITY_ENABLED
 #include "bacsec.h"
 #include "security.h"

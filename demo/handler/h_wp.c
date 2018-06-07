@@ -40,8 +40,6 @@
 #include "device.h"
 #include "handlers.h"
 
-#define SECURITY_ENABLED 1
-
 #if SECURITY_ENABLED
 
 #include "bacsec.h"

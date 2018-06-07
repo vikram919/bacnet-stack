@@ -42,8 +42,6 @@
 #include "handlers.h"
 #include "client.h"
 
-#define SECURITY_ENABLED 1
-
 #if SECURITY_ENABLED
 
 #include "bacsec.h"
@@ -244,7 +242,7 @@ int iam_unicast_encode_pdu(
     npdu_encode_npdu_data(npdu_data, false, MESSAGE_PRIORITY_NORMAL);
 
 #if SECURITY_ENABLED
-        set_npdu_data(&npdu_data, NETWORK_MESSAGE_SECURITY_PAYLOAD);
+        set_npdu_data(npdu_data, NETWORK_MESSAGE_SECURITY_PAYLOAD);
 #endif
 
     npdu_len = npdu_encode_pdu(&buffer[0], dest, &my_address, npdu_data);
