@@ -5,11 +5,16 @@
 # Example: read present-value from analog-output 1 on device 123
 # bacrp 123 1 0 85 
 
+#remove old measurement
+rm test.txt
+
+# initialize request parameters
 device_instance=123
 object_type=1
 object_instance=0
 property=85
 
+# send request n times
 counter=1
 while [ $counter -le 10000 ]
 do 
@@ -17,3 +22,9 @@ do
     sleep .01    
     ((counter++))
 done
+
+# move and rename by timestamp
+d=`date +%Y-%m-%d-%H-%M`
+mv test.txt measurements/$d
+
+
