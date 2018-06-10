@@ -10,6 +10,10 @@ object_type=1
 object_instance=0
 property=85
 
-../readprop/bacrp $device_instance $object_type $object_instance $property
-
-
+counter=1
+while [ $counter -le 10000 ]
+do 
+    ../readprop/bacrp $device_instance $object_type $object_instance $property
+    sleep .01    
+    ((counter++))
+done

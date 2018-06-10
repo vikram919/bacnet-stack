@@ -35,7 +35,8 @@
 #pragma warning( disable : 4996)
 #endif
 
-#define SECURITY_ENABLED 0
+#define SECURITY_ENABLED 1
+#define MEASUREMENT_ON 1
 
 /* This stack implements this version of BACnet */
 #define BACNET_PROTOCOL_VERSION 1

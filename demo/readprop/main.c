@@ -428,6 +428,7 @@ int main(
         }
         if (found) {
             if (Request_Invoke_ID == 0) {
+
                 Request_Invoke_ID =
                     Send_Read_Property_Request(Target_Device_Object_Instance,
                     Target_Object_Type, Target_Object_Instance,
