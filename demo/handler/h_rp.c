@@ -161,25 +161,20 @@ void handler_read_property(
             		encode_security_wrapper(1, &Handler_Transmit_Buffer[npdu_len], &wrapper);
 
 #else
-    len =
-        rp_ack_encode_apdu_object_property_end(&Handler_Transmit_Buffer
-        [npdu_len + apdu_len]);
-    apdu_len += len;
-
-    apdu_len =
-    		rp_ack_encode_apdu_init(&Handler_Transmit_Buffer[npdu_len],
-            service_data->invoke_id, &rpdata);
-
-        /* configure our storage */
-    rpdata.application_data = &Handler_Transmit_Buffer[npdu_len + apdu_len];
-    rpdata.application_data_len =
-        sizeof(Handler_Transmit_Buffer) - (npdu_len + apdu_len);
-
-
-    len = Device_Read_Property(&rpdata);
-
-    if (len >= 0) {
-        apdu_len += len;
+            apdu_len =
+                rp_ack_encode_apdu_init(&Handler_Transmit_Buffer[npdu_len],
+                service_data->invoke_id, &rpdata);
+            /* configure our storage */
+            rpdata.application_data = &Handler_Transmit_Buffer[npdu_len + apdu_len];
+            rpdata.application_data_len =
+                sizeof(Handler_Transmit_Buffer) - (npdu_len + apdu_len);
+            len = Device_Read_Property(&rpdata);
+            if (len >= 0) {
+                apdu_len += len;
+                len =
+                    rp_ack_encode_apdu_object_property_end(&Handler_Transmit_Buffer
+                    [npdu_len + apdu_len]);
+                apdu_len += len;
 #endif
         if (apdu_len > service_data->max_resp) {
             /* too big for the sender - send an abort

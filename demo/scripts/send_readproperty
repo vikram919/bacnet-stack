@@ -5,9 +5,6 @@
 # Example: read present-value from analog-output 1 on device 123
 # bacrp 123 1 0 85 
 
-#remove old measurement
-rm test.txt
-
 # initialize request parameters
 device_instance=123
 object_type=1
