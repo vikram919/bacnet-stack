@@ -278,10 +278,13 @@ int main(
     char *filename = NULL;
 
 #if SECURITY_ENABLED
+    // initialize security wrapper
+    initialize_security_wrapper();
+
     // set master key
     BACNET_KEY_ENTRY key;
     //key.key_identifier = KIKN_GENERAL_NETWORK_ACCESS;
-    key.key_identifier = KIKN_DEVICE_MASTER;
+    key.key_identifier = wrapper.key_identifier;
     key.key_len = sizeof(KEY);
     memcpy(key.key, &KEY, sizeof(KEY));
 
@@ -291,8 +294,6 @@ int main(
 
     if(bacnet_master_key_set(&master) != SEC_RESP_SUCCESS)
     	return 0;
-
-    initialize_security_wrapper();
 
 #endif
 
@@ -428,11 +429,30 @@ int main(
         }
         if (found) {
             if (Request_Invoke_ID == 0) {
-
+#if MEASURE_CLIENT
+       struct timespec t1, t2, clock_resolution;
+       long long elapsedTime;
+       clock_getres(CLOCK_REALTIME, &clock_resolution);
+       clock_gettime(CLOCK_REALTIME, &t1);
+#endif
                 Request_Invoke_ID =
                     Send_Read_Property_Request(Target_Device_Object_Instance,
                     Target_Object_Type, Target_Object_Instance,
                     Target_Object_Property, Target_Object_Index);
+#if MEASURE_CLIENT
+  	  clock_gettime(CLOCK_REALTIME, &t2);
+  	  elapsedTime = ((t2.tv_sec * 1000000000L) + t2.tv_nsec)
+          	              - ((t1.tv_sec * 1000000000L) + t1.tv_nsec);
+
+  	  FILE *file;
+      if( (file = fopen("rp.dat", "a")) == NULL){
+       	printf("File not found!\n");
+       	return 0;
+       } else{
+       	fprintf(file, "%lld\n", elapsedTime);
+       	fclose(file);
+       }
+#endif
             } else if (tsm_invoke_id_free(Request_Invoke_ID))
                 break;
             else if (tsm_invoke_id_failed(Request_Invoke_ID)) {

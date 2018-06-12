@@ -17,7 +17,7 @@ value=${1:-100}
 
 # send request n times
 counter=1
-while [ $counter -le 1 ]
+while [ $counter -le 10000 ]
 do 
     ../writeprop/bacwp $device_instance $object_type $object_instance $property $priority $index $tag $value
     sleep .01    
@@ -26,6 +26,6 @@ done
 
 # move and rename by timestamp
 filename=`date +%Y-%m-%d-%H-%M`
-filename+="-wp"
+filename+="-wpsec"
 mv rp.dat measurements/$filename
 

@@ -13,4 +13,27 @@ if [ -z "$1" ]; then
 else
  local_name=$1
 fi
-../readfile/bacarf $device_instance $file_instance $local_name
+
+if [ -z "$2" ]; then
+ n=1
+else
+ n=$2
+fi
+
+# send request n times
+counter=1
+while [ $counter -le $n ]
+do 
+    ../readfile/bacarf $device_instance $file_instance $local_name
+    sleep .01    
+    ((counter++))
+done
+
+# move and rename by timestamp
+filename=`date +%Y-%m-%d-%H-%M`
+dir="arf"
+filename+="-$dir"
+local_name=${local_name:6}
+filename+="-$local_name"
+mv arf.dat measurements/$dir/$filename
+

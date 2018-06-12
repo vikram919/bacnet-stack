@@ -31,7 +31,7 @@ done
 
 # move and rename by timestamp
 filename=`date +%Y-%m-%d-%H-%M`
-dir="awf"
+dir="awfsec"
 filename+="-$dir"
 local_name=${local_name:6}
 filename+="-$local_name"

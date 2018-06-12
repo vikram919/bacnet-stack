@@ -76,17 +76,6 @@ uint8_t Send_Read_Property_Request_Address(
     uint32_t array_index)
 {
 
-#if MEASUREMENT_ON
-//       struct timespec t1, t2, clock_resolution;
-//       long long elapsedTime;
-//       clock_getres(CLOCK_REALTIME, &clock_resolution);
-//
-//       clock_gettime(CLOCK_REALTIME, &t1);
-	struct timeval t1, t2;
-	gettimeofday(&t1,NULL);
-#endif
-
-
     BACNET_ADDRESS my_address;
     uint8_t invoke_id = 0;
     int len = 0;
@@ -173,33 +162,6 @@ uint8_t Send_Read_Property_Request_Address(
 #endif
         }
     }
-#if MEASUREMENT_ON
-//  	  clock_gettime(CLOCK_REALTIME, &t2);
-//  	  elapsedTime = ((t2.tv_sec * 1000000000L) + t2.tv_nsec)
-//          	              - ((t1.tv_sec * 1000000000L) + t1.tv_nsec);
-//      //printf("Aufruf dauerte  %lld ns\n", elapsedTime);
-//
-//      FILE *file;
-//      if( (file = fopen("test.txt", "a")) == NULL){
-//       	printf("File not found!\n");
-//       	return 0;
-//       } else{
-//       	fprintf(file, "%lld\n", elapsedTime);
-//       	fclose(file);
-//       }
-
-      gettimeofday(&t2,NULL);
-
-      long long elapsedTime = ((t2.tv_sec - t2.tv_sec) * 1000000) + (t2.tv_usec - t1.tv_usec);
-      FILE *file;
-      if( (file = fopen("test.txt", "a")) == NULL){
-    	  printf("File not found!\n");
-    	  return 0;
-      } else{
-    	  fprintf(file, "%lld\n", elapsedTime);
-    	  fclose(file);
-      }
-#endif
     return invoke_id;
 }
 

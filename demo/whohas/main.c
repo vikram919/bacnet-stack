@@ -169,10 +169,13 @@ int main(
     bool by_name = false;
 
 #if SECURITY_ENABLED
+    // initialize security wrapper
+    initialize_security_wrapper();
+
     // set master key
     BACNET_KEY_ENTRY key;
     //key.key_identifier = KIKN_GENERAL_NETWORK_ACCESS;
-    key.key_identifier = KIKN_DEVICE_MASTER;
+    key.key_identifier = wrapper.key_identifier;
     key.key_len = sizeof(KEY);
     memcpy(key.key, &KEY, sizeof(KEY));
 
@@ -182,8 +185,6 @@ int main(
 
     if(bacnet_master_key_set(&master) != SEC_RESP_SUCCESS)
     	return 0;
-
-    initialize_security_wrapper();
 
 #endif
 

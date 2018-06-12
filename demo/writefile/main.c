@@ -201,10 +201,13 @@ int main(
     bool pad_byte = false;
 
 #if SECURITY_ENABLED
+    // initialize security wrapper
+    initialize_security_wrapper();
+
     // set master key
     BACNET_KEY_ENTRY key;
     //key.key_identifier = KIKN_GENERAL_NETWORK_ACCESS;
-    key.key_identifier = KIKN_DEVICE_MASTER;
+    key.key_identifier = wrapper.key_identifier;
     key.key_len = sizeof(KEY);
     memcpy(key.key, &KEY, sizeof(KEY));
 
@@ -214,9 +217,6 @@ int main(
 
     if(bacnet_master_key_set(&master) != SEC_RESP_SUCCESS)
     	return 0;
-
-    initialize_security_wrapper();
-
 #endif
 
     if (argc < 4) {
@@ -343,11 +343,31 @@ int main(
                     End_Of_File_Detected = true;
                 }
                 printf("\rSending %d bytes", (int)(fileStartPosition + len));
+#if MEASURE_CLIENT
+       struct timespec t1, t2, clock_resolution;
+       long long elapsedTime;
+       clock_getres(CLOCK_REALTIME, &clock_resolution);
+       clock_gettime(CLOCK_REALTIME, &t1);
+#endif
                 invoke_id =
                     Send_Atomic_Write_File_Stream
                     (Target_Device_Object_Instance,
                     Target_File_Object_Instance, fileStartPosition, &fileData);
                 Current_Invoke_ID = invoke_id;
+#if MEASURE_CLIENT
+  	  clock_gettime(CLOCK_REALTIME, &t2);
+  	  elapsedTime = ((t2.tv_sec * 1000000000L) + t2.tv_nsec)
+          	              - ((t1.tv_sec * 1000000000L) + t1.tv_nsec);
+
+  	  FILE *file;
+      if( (file = fopen("awf.dat", "a")) == NULL){
+       	printf("File not found!\n");
+       	return 0;
+       } else{
+       	fprintf(file, "%lld\n", elapsedTime);
+       	fclose(file);
+       }
+#endif
             } else if (tsm_invoke_id_failed(invoke_id)) {
                 fprintf(stderr, "\rError: TSM Timeout!\r\n");
                 tsm_free_invoke_id(invoke_id);

@@ -28,6 +28,6 @@ done
 
 # move and rename by timestamp
 filename=`date +%Y-%m-%d-%H-%M`
-dir="rp"
+dir="rpsec"
 filename+="-$dir"
 mv rp.dat measurements/$dir/$filename

@@ -213,22 +213,22 @@ int main(
 		};
 
 
-    // set master key
-    BACNET_KEY_ENTRY key;
-    //key.key_identifier = KIKN_GENERAL_NETWORK_ACCESS;
-    key.key_identifier = KIKN_DEVICE_MASTER;
-    key.key_len = sizeof(KEY);
-    memcpy(key.key, &KEY, sizeof(KEY));
+		// initialize security wrapper
+		initialize_security_wrapper();
 
-    BACNET_SET_MASTER_KEY master;
+		// set master key
+		BACNET_KEY_ENTRY key;
+		//key.key_identifier = KIKN_GENERAL_NETWORK_ACCESS;
+		key.key_identifier = wrapper.key_identifier;
+		key.key_len = sizeof(KEY);
+		memcpy(key.key, &KEY, sizeof(KEY));
 
-    memcpy(&master, &key, sizeof(BACNET_KEY_ENTRY));
+		BACNET_SET_MASTER_KEY master;
 
-    if(bacnet_master_key_set(&master) != SEC_RESP_SUCCESS)
-    	return 0;
+		memcpy(&master, &key, sizeof(BACNET_KEY_ENTRY));
 
-    initialize_security_wrapper();
-
+		if(bacnet_master_key_set(&master) != SEC_RESP_SUCCESS)
+			return 0;
 #endif
 
 

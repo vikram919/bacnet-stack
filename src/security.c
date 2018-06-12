@@ -63,6 +63,9 @@ int initialize_security_wrapper() {
 	char *do_not_decrypt_flag[60];
 	char *non_trusted_source_flag[60];
 	char *secured_by_router_flag[60];
+	char *key_identifier[60];
+
+	printf("---------------------------------\n");
 
 	// payload_net_or_bvll_flag
 	if (getConfigValue(payload_net_or_bvll_flag, "payload_net_or_bvll_flag") != 1){
@@ -179,8 +182,25 @@ int initialize_security_wrapper() {
 //	wrapper.non_trusted_source_flag = false;
 //	wrapper.secured_by_router_flag = false;
 
-	// key identifier: 0 indicates device master key
-	wrapper.key_identifier = KIKN_DEVICE_MASTER;
+	// key identifier:
+	// 1 for DEVICE_MASTER_KEY and AES/MD5
+	// 257 for DEVICE_MASTER_KEY and AES/SHA-256
+	if (getConfigValue(key_identifier, "key_identifier") != 1) {
+		printf("Can not find 'key_identifier' in configuration file.");
+		return(-1);
+	}
+	else {
+
+		int key_id = atoi(key_identifier);
+		if(key_id == 1){
+			printf("Using AES/MD5\n");
+		}
+		else if(key_id == 257) {
+			printf("Using AES/SHA-256\n");
+		}
+		wrapper.key_identifier = key_id;
+	}
+	printf("---------------------------------\n");
 	wrapper.key_revision = 0;
 
 	wrapper.source_device_instance = 1;

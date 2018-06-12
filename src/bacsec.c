@@ -29,6 +29,9 @@
 #include "bacdcode.h"
 #include "bacsec.h"
 
+#if MEASURE_ENC_SIGN
+#include <stdio.h>
+#endif
 
 BACNET_KEY_IDENTIFIER_ALGORITHM key_algorithm(uint16_t id)
 {
@@ -142,10 +145,36 @@ int encode_security_wrapper(int bytes_before,
     memcpy(&apdu[curr], wrapper->service_data, wrapper->service_data_len);
     curr += wrapper->service_data_len;
     /* signature calculation */
+#if MEASURE_ENC_SIGN
+       struct timespec t1, t2, clock_resolution;
+       long long elapsedTime;
+       clock_getres(CLOCK_REALTIME, &clock_resolution);
+       clock_gettime(CLOCK_REALTIME, &t1);
+#endif
     key_sign_msg(&key, &apdu[-bytes_before], (uint32_t)(bytes_before + curr),
         wrapper->signature);
+#if MEASURE_ENC_SIGN
+  	  clock_gettime(CLOCK_REALTIME, &t2);
+  	  elapsedTime = ((t2.tv_sec * 1000000000L) + t2.tv_nsec)
+          	              - ((t1.tv_sec * 1000000000L) + t1.tv_nsec);
+
+  	  FILE *file;
+      if( (file = fopen("sign.dat", "a")) == NULL){
+       	printf("File not found!\n");
+       	return 0;
+       } else{
+       	fprintf(file, "%lld\n", elapsedTime);
+       	fclose(file);
+       }
+#endif
     /* padding and encryption */
     if (wrapper->encrypted_flag) {
+#if MEASURE_ENC_SIGN
+       struct timespec t1, t2, clock_resolution;
+       long long elapsedTime;
+       clock_getres(CLOCK_REALTIME, &clock_resolution);
+       clock_gettime(CLOCK_REALTIME, &t1);
+#endif
         /* set encryption flag, signing is done */
         apdu[0] |= 1 << 6;
         /* handle padding */
@@ -157,12 +186,26 @@ int encode_security_wrapper(int bytes_before,
         }
         curr += encode_unsigned16(&apdu[curr], wrapper->padding_len);
         /* encryption */
+
         key_encrypt_msg(&key, &apdu[enc_begin], (uint32_t)(curr - enc_begin),
             wrapper->signature);
+#if MEASURE_ENC_SIGN
+  	  clock_gettime(CLOCK_REALTIME, &t2);
+  	  elapsedTime = ((t2.tv_sec * 1000000000L) + t2.tv_nsec)
+          	              - ((t1.tv_sec * 1000000000L) + t1.tv_nsec);
+
+  	  FILE *file;
+      if( (file = fopen("encrypt.dat", "a")) == NULL){
+       	printf("File not found!\n");
+       	return 0;
+       } else{
+       	fprintf(file, "%lld\n", elapsedTime);
+       	fclose(file);
+       }
+#endif
     }
     memcpy(&apdu[curr], wrapper->signature, SIGNATURE_LEN);
     curr += SIGNATURE_LEN;
-
     return curr;
 }
 
@@ -454,10 +497,30 @@ int decode_security_wrapper_safe(int bytes_before,
     /* read signature */
     memcpy(wrapper->signature, &apdu[real_len], SIGNATURE_LEN);
     if (wrapper->encrypted_flag) {
+#if MEASURE_ENC_SIGN
+       struct timespec t1, t2, clock_resolution;
+       long long elapsedTime;
+       clock_getres(CLOCK_REALTIME, &clock_resolution);
+       clock_gettime(CLOCK_REALTIME, &t1);
+#endif
         if (!key_decrypt_msg(&key, &apdu[enc_begin],
                 (uint32_t)(real_len - enc_begin), wrapper->signature)) {
             return -SEC_RESP_MALFORMED_MESSAGE;
         }
+#if MEASURE_ENC_SIGN
+  	  clock_gettime(CLOCK_REALTIME, &t2);
+  	  elapsedTime = ((t2.tv_sec * 1000000000L) + t2.tv_nsec)
+          	              - ((t1.tv_sec * 1000000000L) + t1.tv_nsec);
+
+  	  FILE *file;
+      if( (file = fopen("decrypt.dat", "a")) == NULL){
+       	printf("File not found!\n");
+       	return 0;
+       } else{
+       	fprintf(file, "%lld\n", elapsedTime);
+       	fclose(file);
+       }
+#endif
         /*curr += */decode_unsigned16(&apdu[real_len - 2], &wrapper->padding_len);
         real_len -= wrapper->padding_len;
         memcpy(wrapper->padding, &apdu[wrapper->padding_len],
@@ -505,11 +568,31 @@ int decode_security_wrapper_safe(int bytes_before,
     wrapper->service_data_len = (uint16_t)(real_len - curr);
     memcpy(wrapper->service_data, &apdu[curr], wrapper->service_data_len);
     curr += wrapper->service_data_len;
+
+#if MEASURE_ENC_SIGN
+       struct timespec t1, t2, clock_resolution;
+       long long elapsedTime;
+       clock_getres(CLOCK_REALTIME, &clock_resolution);
+       clock_gettime(CLOCK_REALTIME, &t1);
+#endif
     if (!key_verify_sign_msg(&key, &apdu[-bytes_before],
             (uint32_t)(bytes_before + real_len), wrapper->signature)) {
         return -SEC_RESP_BAD_SIGNATURE;
     }
+#if MEASURE_ENC_SIGN
+  	  clock_gettime(CLOCK_REALTIME, &t2);
+  	  elapsedTime = ((t2.tv_sec * 1000000000L) + t2.tv_nsec)
+          	              - ((t1.tv_sec * 1000000000L) + t1.tv_nsec);
 
+  	  FILE *file;
+      if( (file = fopen("unsign.dat", "a")) == NULL){
+       	printf("File not found!\n");
+       	return 0;
+       } else{
+       	fprintf(file, "%lld\n", elapsedTime);
+       	fclose(file);
+       }
+#endif
     return curr;
 }
 

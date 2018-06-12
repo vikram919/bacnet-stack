@@ -1,12 +1,12 @@
 #!/bin/bash
-# Sending write-file
-# Usage: bacawf device-instance file-instance local-name [octet count] [pad value]
-# If you want write to File 1 to Device 123 with local-name temp.txt,use the following command:
-# bacawf 123 1 temp.txt
-
+# Sending read-file
+# Usage: bacarf device-instance file-instance local-name
+# If you want read File 1 from Device 123 and save it to temp.txt,use the following command:
+# bacarf 123 1 temp.txt
 
 device_instance=123
 file_instance=1
+local_name=temp.txt
 
 if [ -z "$1" ]; then
  local_name=temp.txt
@@ -24,16 +24,16 @@ fi
 counter=1
 while [ $counter -le $n ]
 do 
-    ../writefile/bacawf $device_instance $file_instance $local_name $value
+    ../readfile/bacarf $device_instance $file_instance $local_name
     sleep .01    
     ((counter++))
 done
 
 # move and rename by timestamp
 filename=`date +%Y-%m-%d-%H-%M`
-dir="awf"
+dir="arfsec"
 filename+="-$dir"
 local_name=${local_name:6}
 filename+="-$local_name"
-mv awf.dat measurements/$dir/$filename
+mv arf.dat measurements/$dir/$filename
 
