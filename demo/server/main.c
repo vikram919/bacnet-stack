@@ -337,8 +337,7 @@ int main(
   		  }
   	  }
 #endif
-        	}
-        }
+  	  }
         /* at least one second has passed */
         elapsed_seconds = (uint32_t) (current_seconds - last_seconds);
         if (elapsed_seconds) {
