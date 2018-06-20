@@ -69,9 +69,28 @@ static void match_name_or_object(
             object.identifier.type, data->object.identifier.instance,
             &object_name);
         if (found) {
-            Send_I_Have(Device_Object_Instance_Number(),
-                (BACNET_OBJECT_TYPE) data->object.identifier.type,
-                data->object.identifier.instance, &object_name);
+#if MEASURE_CLIENT
+       struct timespec t1, t2, clock_resolution;
+       long long elapsedTime;
+       clock_getres(CLOCK_REALTIME, &clock_resolution);
+       clock_gettime(CLOCK_REALTIME, &t1);
+#endif
+       Send_I_Have(Device_Object_Instance_Number(),
+                     (BACNET_OBJECT_TYPE) data->object.identifier.type,
+                     data->object.identifier.instance, &object_name);
+#if MEASURE_CLIENT
+  	  clock_gettime(CLOCK_REALTIME, &t2);
+  	  elapsedTime = ((t2.tv_sec * 1000000000L) + t2.tv_nsec)
+          	              - ((t1.tv_sec * 1000000000L) + t1.tv_nsec);
+  	  FILE *file;
+      if( (file = fopen("ih.dat", "a")) == NULL){
+       	printf("File not found!\n");
+       	return;
+       } else{
+       	fprintf(file, "%lld\n", elapsedTime);
+       	fclose(file);
+       }
+#endif
         }
     }
 }

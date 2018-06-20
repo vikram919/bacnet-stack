@@ -286,11 +286,30 @@ int main(
     dlenv_init();
     atexit(datalink_cleanup);
     /* send the request */
-    Send_I_Am_To_Network(&dest,
-        Target_Device_ID,
-        Target_Max_APDU,
-        Target_Segmentation,
-        Target_Vendor_ID);
+#if MEASURE_CLIENT
+       struct timespec t1, t2, clock_resolution;
+       long long elapsedTime;
+       clock_getres(CLOCK_REALTIME, &clock_resolution);
+       clock_gettime(CLOCK_REALTIME, &t1);
+#endif
+       Send_I_Am_To_Network(&dest,
+           Target_Device_ID,
+           Target_Max_APDU,
+           Target_Segmentation,
+           Target_Vendor_ID);
+#if MEASURE_CLIENT
+  	  clock_gettime(CLOCK_REALTIME, &t2);
+  	  elapsedTime = ((t2.tv_sec * 1000000000L) + t2.tv_nsec)
+          	              - ((t1.tv_sec * 1000000000L) + t1.tv_nsec);
+  	  FILE *file;
+      if( (file = fopen("ih.dat", "a")) == NULL){
+       	printf("File not found!\n");
+       	return 0;
+       } else{
+       	fprintf(file, "%lld\n", elapsedTime);
+       	fclose(file);
+       }
+#endif
 
     return 0;
 }

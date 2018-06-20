@@ -314,7 +314,40 @@ int main(
 
         /* process */
         if (pdu_len) {
-            npdu_handler(&src, &Rx_Buf[0], pdu_len);
+#if MEASURE_SERVER
+        	struct timespec t1, t2, clock_resolution;
+        	long long elapsedTime;
+        	clock_getres(CLOCK_REALTIME, &clock_resolution);
+        	clock_gettime(CLOCK_REALTIME, &t1);
+#endif
+        	npdu_handler(&src, &Rx_Buf[0], pdu_len);
+#if MEASURE_SERVER
+      clock_gettime(CLOCK_REALTIME, &t2);
+  	  elapsedTime = ((t2.tv_sec * 1000000000L) + t2.tv_nsec)
+          	              - ((t1.tv_sec * 1000000000L) + t1.tv_nsec);
+
+  	  if( (wrapper.service_data[2] & 0xF0) == PDU_TYPE_CONFIRMED_SERVICE_REQUEST){
+  		  FILE *file;
+  		  if( (file = fopen("server.dat", "a")) == NULL){
+  			  printf("File not found!\n");
+  			  return 0;
+  		  } else{
+  			  fprintf(file, "%lld\n", elapsedTime);
+  			  fclose(file);
+  		  }
+  	  }
+#endif
+
+
+
+            switch (wrapper.service_data[2] & 0xF0) {
+                        case PDU_TYPE_CONFIRMED_SERVICE_REQUEST:
+                        	printf("Confirmed!\n");
+                        	break;
+                        default:
+                        	printf("Unconfirmed!\n");
+                        	break;
+            }
         }
         /* at least one second has passed */
         elapsed_seconds = (uint32_t) (current_seconds - last_seconds);

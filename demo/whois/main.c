@@ -520,8 +520,28 @@ int main(
     last_seconds = time(NULL);
     timeout_seconds = apdu_timeout() / 1000;
     /* send the request */
+#if MEASURE_CLIENT
+       struct timespec t1, t2, clock_resolution;
+       long long elapsedTime;
+       clock_getres(CLOCK_REALTIME, &clock_resolution);
+       clock_gettime(CLOCK_REALTIME, &t1);
+#endif
     Send_WhoIs_To_Network(&dest, Target_Object_Instance_Min,
         Target_Object_Instance_Max);
+#if MEASURE_CLIENT
+  	  clock_gettime(CLOCK_REALTIME, &t2);
+  	  elapsedTime = ((t2.tv_sec * 1000000000L) + t2.tv_nsec)
+          	              - ((t1.tv_sec * 1000000000L) + t1.tv_nsec);
+
+  	  FILE *file;
+      if( (file = fopen("wi.dat", "a")) == NULL){
+       	printf("File not found!\n");
+       	return 0;
+       } else{
+       	fprintf(file, "%lld\n", elapsedTime);
+       	fclose(file);
+       }
+#endif
     /* loop forever */
     for (;;) {
         /* increment timer - exit if timed out */
