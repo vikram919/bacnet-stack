@@ -302,7 +302,7 @@ int main(
   	  elapsedTime = ((t2.tv_sec * 1000000000L) + t2.tv_nsec)
           	              - ((t1.tv_sec * 1000000000L) + t1.tv_nsec);
   	  FILE *file;
-      if( (file = fopen("ih.dat", "a")) == NULL){
+      if( (file = fopen("ia.dat", "a")) == NULL){
        	printf("File not found!\n");
        	return 0;
        } else{
