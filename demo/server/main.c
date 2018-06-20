@@ -337,17 +337,7 @@ int main(
   		  }
   	  }
 #endif
-
-
-
-            switch (wrapper.service_data[2] & 0xF0) {
-                        case PDU_TYPE_CONFIRMED_SERVICE_REQUEST:
-                        	printf("Confirmed!\n");
-                        	break;
-                        default:
-                        	printf("Unconfirmed!\n");
-                        	break;
-            }
+        	}
         }
         /* at least one second has passed */
         elapsed_seconds = (uint32_t) (current_seconds - last_seconds);
