@@ -543,6 +543,8 @@ int main(
        	fclose(file);
        }
 #endif
+
+#if !MEASURE_CLIENT
     /* loop forever */
     for (;;) {
         /* increment timer - exit if timed out */
@@ -569,6 +571,6 @@ int main(
         last_seconds = current_seconds;
     }
     print_address_cache();
-
+#endif
     return 0;
 }

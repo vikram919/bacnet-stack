@@ -317,6 +317,7 @@ int main(
 #endif
 
     }
+#if !MEASURE_CLIENT
     /* loop forever */
     for (;;) {
         /* increment timer - exit if timed out */
@@ -336,6 +337,6 @@ int main(
         /* keep track of time for next check */
         last_seconds = current_seconds;
     }
-
+#endif
     return 0;
 }

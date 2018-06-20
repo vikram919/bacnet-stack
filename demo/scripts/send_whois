@@ -1,0 +1,26 @@
+#!/bin/bash
+# Sending who-is request
+# Usage: bacwi
+# Send a WhoIs request to all devices 
+
+if [ -z "$1" ]; then
+ n=1
+else
+ n=$1
+fi
+
+# send request n times
+counter=1
+while [ $counter -le $n ]
+do 
+    ../whois/bacwi 
+#    sleep .01    
+    ((counter++))
+done
+
+# move and rename by timestamp
+filename=`date +%Y-%m-%d-%H-%M`
+dir="wi"
+filename+="-$dir"
+mv wi.dat measurements/$dir/$filename
+
