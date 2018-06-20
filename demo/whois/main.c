@@ -521,6 +521,7 @@ int main(
     timeout_seconds = apdu_timeout() / 1000;
     /* send the request */
 #if MEASURE_CLIENT
+       timeout_seconds = 0;
        struct timespec t1, t2, clock_resolution;
        long long elapsedTime;
        clock_getres(CLOCK_REALTIME, &clock_resolution);
