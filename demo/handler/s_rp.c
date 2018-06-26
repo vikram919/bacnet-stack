@@ -112,21 +112,13 @@ uint8_t Send_Read_Property_Request_Address(
         data.array_index = array_index;
 
 #if SECURITY_ENABLED
-
         // setup security wrapper fields
         set_security_wrapper_fields_static(device_id, dest, &my_address);
-
-        // FIXME: no initialization leads to error in rp_encode_apdu
-        uint8_t test[MAX_APDU];
-
-        wrapper.service_data = test;
         wrapper.service_data_len =
         		(uint8_t)rp_encode_apdu(&wrapper.service_data[2], invoke_id, &data);
         encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
 
         wrapper.service_data_len += 2;
-
-        wrapper.service_type = wrapper.service_data[2];
 
         len =
         	encode_security_wrapper(1, &Handler_Transmit_Buffer[pdu_len], &wrapper);

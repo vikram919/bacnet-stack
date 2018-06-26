@@ -92,26 +92,18 @@ uint8_t Send_Atomic_Read_File_Stream(
 #if SECURITY_ENABLED
         set_npdu_data(&npdu_data, NETWORK_MESSAGE_SECURITY_PAYLOAD);
 #endif
-
         pdu_len =
             npdu_encode_pdu(&Handler_Transmit_Buffer[0], &dest, &my_address,
             &npdu_data);
-
 #if SECURITY_ENABLED
         // setup security wrapper fields
-        // FIXME: device id is always 1
         set_security_wrapper_fields_static(device_id, &dest, &my_address);
 
-        uint8_t test[MAX_APDU];
-        wrapper.service_data = test;
-
         wrapper.service_data_len = arf_encode_apdu(&wrapper.service_data[2],
-                                invoke_id, &data);
-
+        		invoke_id, &data);
         encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
 
         wrapper.service_data_len += 2;
-        wrapper.service_type = wrapper.service_data[2];
 
         len =
            	encode_security_wrapper(1, &Handler_Transmit_Buffer[pdu_len], &wrapper);

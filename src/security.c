@@ -41,17 +41,21 @@ int set_security_wrapper_fields_static(uint32_t device_id,
 
     // destination and source network information
     wrapper.dnet = dest->net;
-    wrapper.dlen = sizeof(dest->adr);
-    memcpy(wrapper.dadr, dest->adr, wrapper.dlen);
+    wrapper.dlen = dest->mac_len;
+    memcpy(wrapper.dadr, dest->mac, wrapper.dlen);
+
     wrapper.snet = src->net;
-    // wrapper.slen = my_address.len;
-    wrapper.slen = sizeof(src->adr);
-    memcpy(wrapper.sadr, src->adr, wrapper.slen);
+    wrapper.slen = src->mac_len;
+    memcpy(wrapper.sadr, src->mac, wrapper.slen);
 
 	return 0;
 }
 
 int initialize_security_wrapper() {
+
+	// FIXME: no initialization leads to error in rp_encode_apdu
+	uint8_t test[MAX_APDU];
+	wrapper.service_data = test;
 
 	/* set bits of control octet */
 	parseIniFile("../config.ini");

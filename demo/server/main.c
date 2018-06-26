@@ -69,6 +69,24 @@
 #include "security.h"
 #endif
 
+// define key, for now we us the same key for each device
+// FIXME: implement key server
+uint8_t KEY[] = {
+	(uint8_t) 0x97, (uint8_t) 0xEC, (uint8_t) 0x8A, (uint8_t) 0xEF,
+	(uint8_t) 0x9E, (uint8_t) 0x2C, (uint8_t) 0x94, (uint8_t) 0x47,
+	(uint8_t) 0x96, (uint8_t) 0xEB, (uint8_t) 0x13, (uint8_t) 0x5A,
+	(uint8_t) 0x11, (uint8_t) 0x55, (uint8_t) 0xB0, (uint8_t) 0x4D,
+	// 256 bit SHA-256
+	(uint8_t) 0xB0, (uint8_t) 0x54, (uint8_t) 0xFB, (uint8_t) 0xE5,
+	(uint8_t) 0xAA, (uint8_t) 0x53, (uint8_t) 0xB0, (uint8_t) 0xD9,
+	(uint8_t) 0x05, (uint8_t) 0x26, (uint8_t) 0x3F, (uint8_t) 0x10,
+	(uint8_t) 0x3A, (uint8_t) 0xD0, (uint8_t) 0x3D, (uint8_t) 0x65,
+	(uint8_t) 0xEE, (uint8_t) 0x2D, (uint8_t) 0x92, (uint8_t) 0x68,
+	(uint8_t) 0xA9, (uint8_t) 0xAB, (uint8_t) 0x23, (uint8_t) 0x3B,
+	(uint8_t) 0xE5, (uint8_t) 0x37, (uint8_t) 0x66, (uint8_t) 0x90,
+	(uint8_t) 0x73, (uint8_t) 0xC9, (uint8_t) 0x64, (uint8_t) 0x75
+};
+
 /** @file server/main.c  Example server application using the BACnet Stack. */
 
 /* (Doxygen note: The next two lines pull all the following Javadoc
@@ -193,42 +211,22 @@ int main(
     char *argv[])
 {
 
-	#if SECURITY_ENABLED
+#if SECURITY_ENABLED
+	// initialize security wrapper
+	initialize_security_wrapper();
 
-	// key
-		uint8_t KEY[] = {
-		    		(uint8_t) 0x97, (uint8_t) 0xEC, (uint8_t) 0x8A, (uint8_t) 0xEF,
-		  			(uint8_t) 0x9E, (uint8_t) 0x2C, (uint8_t) 0x94, (uint8_t) 0x47,
-		   			(uint8_t) 0x96, (uint8_t) 0xEB, (uint8_t) 0x13, (uint8_t) 0x5A,
-		  			(uint8_t) 0x11, (uint8_t) 0x55, (uint8_t) 0xB0, (uint8_t) 0x4D,
-		   			// 256 bit SHA-256
-		   			(uint8_t) 0xB0, (uint8_t) 0x54, (uint8_t) 0xFB, (uint8_t) 0xE5,
-		   			(uint8_t) 0xAA, (uint8_t) 0x53, (uint8_t) 0xB0, (uint8_t) 0xD9,
-		  			(uint8_t) 0x05, (uint8_t) 0x26, (uint8_t) 0x3F, (uint8_t) 0x10,
-		   			(uint8_t) 0x3A, (uint8_t) 0xD0, (uint8_t) 0x3D, (uint8_t) 0x65,
-		   			(uint8_t) 0xEE, (uint8_t) 0x2D, (uint8_t) 0x92, (uint8_t) 0x68,
-		   			(uint8_t) 0xA9, (uint8_t) 0xAB, (uint8_t) 0x23, (uint8_t) 0x3B,
-		   			(uint8_t) 0xE5, (uint8_t) 0x37, (uint8_t) 0x66, (uint8_t) 0x90,
-		   			(uint8_t) 0x73, (uint8_t) 0xC9, (uint8_t) 0x64, (uint8_t) 0x75
-		};
+	// set master key
+	BACNET_KEY_ENTRY key;
+	key.key_identifier = wrapper.key_identifier;
+	key.key_len = sizeof(KEY);
+	memcpy(key.key, &KEY, sizeof(KEY));
 
+	BACNET_SET_MASTER_KEY master;
 
-		// initialize security wrapper
-		initialize_security_wrapper();
+	memcpy(&master, &key, sizeof(BACNET_KEY_ENTRY));
 
-		// set master key
-		BACNET_KEY_ENTRY key;
-		//key.key_identifier = KIKN_GENERAL_NETWORK_ACCESS;
-		key.key_identifier = wrapper.key_identifier;
-		key.key_len = sizeof(KEY);
-		memcpy(key.key, &KEY, sizeof(KEY));
-
-		BACNET_SET_MASTER_KEY master;
-
-		memcpy(&master, &key, sizeof(BACNET_KEY_ENTRY));
-
-		if(bacnet_master_key_set(&master) != SEC_RESP_SUCCESS)
-			return 0;
+	if(bacnet_master_key_set(&master) != SEC_RESP_SUCCESS)
+		return 0;
 #endif
 
 
@@ -322,20 +320,133 @@ int main(
 #endif
         	npdu_handler(&src, &Rx_Buf[0], pdu_len);
 #if MEASURE_SERVER
-      clock_gettime(CLOCK_REALTIME, &t2);
-  	  elapsedTime = ((t2.tv_sec * 1000000000L) + t2.tv_nsec)
+        	clock_gettime(CLOCK_REALTIME, &t2);
+        	elapsedTime = ((t2.tv_sec * 1000000000L) + t2.tv_nsec)
           	              - ((t1.tv_sec * 1000000000L) + t1.tv_nsec);
-
-  	  if( (wrapper.service_data[2] & 0xF0) == PDU_TYPE_CONFIRMED_SERVICE_REQUEST){
-  		  FILE *file;
-  		  if( (file = fopen("server.dat", "a")) == NULL){
-  			  printf("File not found!\n");
-  			  return 0;
-  		  } else{
-  			  fprintf(file, "%lld\n", elapsedTime);
-  			  fclose(file);
-  		  }
-  	  }
+        	// determine the PDU type here again not to influence the measurement
+        	BACNET_ADDRESS dest = { 0 };
+       	    BACNET_NPDU_DATA npdu_data = { 0 };
+       	    uint8_t  service_choice;
+            if (Rx_Buf[0] == BACNET_PROTOCOL_VERSION) {
+                int offset = npdu_decode(&Rx_Buf[0], &dest, &src, &npdu_data);
+                if (npdu_data.network_layer_message) {
+                    /*FIXME: Only secured Network Layer Message Types handled*/
+                	if(npdu_data.network_message_type >= NETWORK_MESSAGE_CHALLENGE_REQUEST &&
+                	   npdu_data.network_message_type <= NETWORK_MESSAGE_SET_MASTER_KEY) {
+                		FILE *file;
+                		if( (file = fopen("server.dat", "a")) == NULL){
+                			printf("File not found!\n");
+                			return 0;
+                		} else{
+                			BACNET_SECURITY_WRAPPER w;
+                			uint8_t test[MAX_APDU];
+                			w.service_data = test;
+                			uint32_t len_remaining = pdu_len - offset;
+                			decode_security_wrapper_safe(1, &Rx_Buf[offset], len_remaining, &w);
+                			switch (w.service_data[2]) {
+                   			case PDU_TYPE_CONFIRMED_SERVICE_REQUEST:
+                				service_choice = w.service_data[5];
+                			    switch(service_choice) {
+                				case SERVICE_CONFIRMED_READ_PROPERTY:
+                					fprintf(file, "ReadProperty %lld\n", elapsedTime);
+                					break;
+                				case SERVICE_CONFIRMED_WRITE_PROPERTY:
+                					fprintf(file, "WriteProperty %lld\n", elapsedTime);
+                					break;
+                				case SERVICE_CONFIRMED_ATOMIC_READ_FILE:
+                					fprintf(file, "ReadFile %lld\n", elapsedTime);
+                					break;
+                				case SERVICE_CONFIRMED_ATOMIC_WRITE_FILE:
+                					fprintf(file, "WriteFileFile %lld\n", elapsedTime);
+                					break;
+                				default:
+                					break;
+                				}
+                				break;
+                			case PDU_TYPE_UNCONFIRMED_SERVICE_REQUEST:
+                				service_choice = w.service_data[3];
+                				switch (service_choice) {
+                				case SERVICE_UNCONFIRMED_WHO_IS:
+                					fprintf(file, "WhoIs %lld\n", elapsedTime);
+                					break;
+                				case SERVICE_UNCONFIRMED_WHO_HAS:
+                					fprintf(file, "WhoHas %lld\n", elapsedTime);
+                					break;
+                				case SERVICE_UNCONFIRMED_I_AM:
+                					fprintf(file, "IAm %lld\n", elapsedTime);
+                					break;
+                				default:
+                					break;
+                				}
+                				break;
+                			case PDU_TYPE_SIMPLE_ACK:
+                				fprintf(file, "SimpleACK %lld\n", elapsedTime);
+                				break;
+                			case PDU_TYPE_COMPLEX_ACK:
+                				fprintf(file, "ComplexACK %lld\n", elapsedTime);
+                				break;
+                			default:
+                				break;
+                			}
+                			fclose(file);
+                		}
+                	}
+                } else if ((offset > 0) && (offset <= pdu_len)) {
+                	FILE *file;
+                	if( (file = fopen("server.dat", "a")) == NULL){
+                		printf("File not found!\n");
+                		return 0;
+                	} else{
+                		switch (Rx_Buf[offset] & 0xF0) {
+                		case PDU_TYPE_CONFIRMED_SERVICE_REQUEST:
+                			service_choice = Rx_Buf[offset + 3];
+                 			switch(service_choice) {
+                 			case SERVICE_CONFIRMED_READ_PROPERTY:
+                 				fprintf(file, "ReadProperty %lld\n", elapsedTime);
+                				break;
+                			case SERVICE_CONFIRMED_WRITE_PROPERTY:
+                				fprintf(file, "WriteProperty %lld\n", elapsedTime);
+                				break;
+                			case SERVICE_CONFIRMED_ATOMIC_READ_FILE:
+                				fprintf(file, "ReadFile %lld\n", elapsedTime);
+                				break;
+                			case SERVICE_CONFIRMED_ATOMIC_WRITE_FILE:
+                				fprintf(file, "WriteFileFile %lld\n", elapsedTime);
+                				break;
+                			default:
+                				break;
+                			}
+                 			break;
+                		case PDU_TYPE_UNCONFIRMED_SERVICE_REQUEST:
+                			printf("Reached\n");
+                			service_choice = Rx_Buf[offset + 1];
+                			switch (service_choice) {
+                			case SERVICE_UNCONFIRMED_WHO_IS:
+                				fprintf(file, "WhoIs %lld\n", elapsedTime);
+                				break;
+                			case SERVICE_UNCONFIRMED_WHO_HAS:
+                				fprintf(file, "WhoHas %lld\n", elapsedTime);
+                				break;
+                			case SERVICE_UNCONFIRMED_I_AM:
+                				fprintf(file, "IAm %lld\n", elapsedTime);
+                				break;
+                			default:
+                				break;
+                			}
+                			break;
+                		case PDU_TYPE_SIMPLE_ACK:
+                			fprintf(file, "SimpleACK %lld\n", elapsedTime);
+                			break;
+                		case PDU_TYPE_COMPLEX_ACK:
+                			fprintf(file, "ComplexACK %lld\n", elapsedTime);
+                			break;
+                		default:
+                			break;
+                		}
+                		fclose(file);
+                	}
+                }
+            }
 #endif
   	  }
         /* at least one second has passed */

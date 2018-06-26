@@ -85,12 +85,7 @@ void Send_I_Am_To_Network(
 #if SECURITY_ENABLED
 
     // setup security wrapper fields
-    // FIXME: device id is always 1
     set_security_wrapper_fields_static(device_id, target_address, &my_address);
-
-    // FIXME: no initialization leads to error in *_encode_apdu
-    uint8_t test[MAX_APDU];
-    wrapper.service_data = test;
 
     wrapper.service_data_len = iam_encode_apdu(&wrapper.service_data[2],
             device_id, max_apdu, segmentation, vendor_id);
@@ -252,10 +247,6 @@ int iam_unicast_encode_pdu(
     // setup security wrapper fields
     // FIXME: device id is always 1
     set_security_wrapper_fields_static(Device_Object_Instance_Number(), dest, &my_address);
-
-    // FIXME: no initialization leads to error in *_encode_apdu
-    uint8_t test[MAX_APDU];
-    wrapper.service_data = test;
 
     wrapper.service_data_len = iam_encode_apdu(&wrapper.service_data[2],
                Device_Object_Instance_Number() , MAX_APDU, SEGMENTATION_NONE, Device_Vendor_Identifier());

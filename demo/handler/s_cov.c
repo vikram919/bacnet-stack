@@ -85,24 +85,14 @@ int ucov_notify_encode_pdu(
     pdu_len = npdu_encode_pdu(&buffer[0], dest, &my_address, npdu_data);
 
 #if SECURITY_ENABLED
-
-
     // setup security wrapper fields
     set_security_wrapper_fields_static(Device_Object_Instance_Number(), dest, &my_address);
 
-    // FIXME: no initialization leads to error in rp_encode_apdu
-    uint8_t test[MAX_APDU];
-
-    wrapper.service_data = test;
     wrapper.service_data_len = (uint8_t)ucov_notify_encode_apdu(&wrapper.service_data[2], MAX_APDU, cov_data);
-
     wrapper.service_data_len += 2;
-
-    wrapper.service_type = wrapper.service_data[2];
 
     len =
        	encode_security_wrapper(1, &buffer[pdu_len], &wrapper);
-
 #else
     /* encode the APDU portion of the packet */
     len = ucov_notify_encode_apdu(&buffer[pdu_len],
