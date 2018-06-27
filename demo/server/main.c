@@ -418,7 +418,6 @@ int main(
                 			}
                  			break;
                 		case PDU_TYPE_UNCONFIRMED_SERVICE_REQUEST:
-                			printf("Reached\n");
                 			service_choice = Rx_Buf[offset + 1];
                 			switch (service_choice) {
                 			case SERVICE_UNCONFIRMED_WHO_IS:

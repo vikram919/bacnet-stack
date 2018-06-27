@@ -99,10 +99,6 @@ int encode_security_wrapper(int bytes_before,
     curr += encode_unsigned32(&apdu[curr], wrapper->message_id);
     /* timestamp */
     curr += encode_unsigned32(&apdu[curr], wrapper->timestamp);
-    /* validation of the timestamp */
-    /* FIXME define security time window (recommendation 180 s) for timestamp validation */
-    if(difftime(time(NULL), wrapper->timestamp) < 0)
-    	return -SEC_RESP_BAD_TIMESTAMP;
     /* begin encryption starting from destination device instance */
     enc_begin = curr;
     /* destination device instance */

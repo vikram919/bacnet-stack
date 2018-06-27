@@ -177,15 +177,6 @@ int initialize_security_wrapper() {
 		}
 	}
 
-//	wrapper.payload_net_or_bvll_flag = true;
-//	wrapper.encrypted_flag = true;
-//	// bit 5: reserved, shall be zero
-//	wrapper.authentication_flag = false;
-//	wrapper.do_not_unwrap_flag = false;
-//	wrapper.do_not_decrypt_flag = false;
-//	wrapper.non_trusted_source_flag = false;
-//	wrapper.secured_by_router_flag = false;
-
 	// key identifier:
 	// 1 for DEVICE_MASTER_KEY and AES/MD5
 	// 257 for DEVICE_MASTER_KEY and AES/SHA-256
