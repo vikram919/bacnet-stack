@@ -128,7 +128,11 @@ int alarm_ack_decode_service_request(
     uint32_t enumValue;
 
     /* unused parameter */
+<<<<<<< HEAD
     unused_var(apdu_len);
+=======
+    apdu_len = apdu_len;
+>>>>>>> refs/heads/bacnet-sec
 
     if (-1 == (section_len =
             decode_context_unsigned(&apdu[len], 0,

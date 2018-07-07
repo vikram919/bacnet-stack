@@ -1,4 +1,5 @@
 *.o
+<<<<<<< HEAD
 *.a
 *.so
 *.dylib
@@ -31,3 +32,41 @@ bacserv
 bacucov
 bacwh
 bacwir
+=======
+/bin
+.cproject
+.settings/
+lib/libbacnet.a
+
+demo/abort/bacabort
+demo/dcc/bacdcc
+demo/epics/bacepics
+demo/error/bacerror
+demo/gateway/bacgateway
+demo/getevent/bacge
+demo/iam/baciam
+demo/iamrouter/baciamr
+demo/initrouter/bacinitr
+demo/mstpcap/mstpcap
+demo/mstpcrc/mstpcrc
+demo/readbdt/bacrbdt
+demo/readfile/bacarf
+demo/readprop/bacrp
+demo/readpropm/bacrpm
+demo/readrange/bacrr
+demo/reinit/bacrd
+demo/router-ipv6/bacroute
+demo/scov/bacscov
+demo/server/bacserv
+demo/timesync/bacts
+demo/ucov/bacucov
+demo/uevent/bacuevent
+demo/uptransfer/bacupt
+demo/whohas/bacwh
+demo/whois/bacwi
+demo/whoisrouter/bacwir
+demo/writefile/bacawf
+demo/writeprop/bacwp
+demo/writepropm/bacwpm
+
+>>>>>>> refs/heads/bacnet-sec

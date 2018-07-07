@@ -54,6 +54,7 @@
 #include "txbuf.h"
 #include "dlenv.h"
 
+<<<<<<< HEAD
 /* buffer used for receive */
 static uint8_t Rx_Buf[MAX_MPDU] = { 0 };
 
@@ -210,6 +211,205 @@ int main(
     BACNET_SUBSCRIBE_COV_DATA *cov_data = NULL;
     int argi = 0;
     int arg_remaining = 0;
+=======
+#if SECURITY_ENABLED
+#include "bacsec.h"
+#include "security.h"
+#endif
+
+// define key, for now we us the same key for each device
+// FIXME: implement key server
+uint8_t KEY[] = {
+	(uint8_t) 0x97, (uint8_t) 0xEC, (uint8_t) 0x8A, (uint8_t) 0xEF,
+	(uint8_t) 0x9E, (uint8_t) 0x2C, (uint8_t) 0x94, (uint8_t) 0x47,
+	(uint8_t) 0x96, (uint8_t) 0xEB, (uint8_t) 0x13, (uint8_t) 0x5A,
+	(uint8_t) 0x11, (uint8_t) 0x55, (uint8_t) 0xB0, (uint8_t) 0x4D,
+	// 256 bit SHA-256
+	(uint8_t) 0xB0, (uint8_t) 0x54, (uint8_t) 0xFB, (uint8_t) 0xE5,
+	(uint8_t) 0xAA, (uint8_t) 0x53, (uint8_t) 0xB0, (uint8_t) 0xD9,
+	(uint8_t) 0x05, (uint8_t) 0x26, (uint8_t) 0x3F, (uint8_t) 0x10,
+	(uint8_t) 0x3A, (uint8_t) 0xD0, (uint8_t) 0x3D, (uint8_t) 0x65,
+	(uint8_t) 0xEE, (uint8_t) 0x2D, (uint8_t) 0x92, (uint8_t) 0x68,
+	(uint8_t) 0xA9, (uint8_t) 0xAB, (uint8_t) 0x23, (uint8_t) 0x3B,
+	(uint8_t) 0xE5, (uint8_t) 0x37, (uint8_t) 0x66, (uint8_t) 0x90,
+	(uint8_t) 0x73, (uint8_t) 0xC9, (uint8_t) 0x64, (uint8_t) 0x75
+};
+
+/* buffer used for receive */
+static uint8_t Rx_Buf[MAX_MPDU] = { 0 };
+
+/* converted command line arguments */
+static uint32_t Target_Device_Object_Instance = BACNET_MAX_INSTANCE;
+/* Process identifier for matching replies */
+static uint32_t Target_Device_Process_Identifier = 0;
+/* the invoke id is needed to filter incoming messages */
+static uint8_t Request_Invoke_ID = 0;
+/* MAC and SNET address of target */
+static BACNET_ADDRESS Target_Address;
+/* indication of error, reject, or abort */
+static bool Error_Detected = false;
+/* data used in COV subscription request */
+BACNET_SUBSCRIBE_COV_DATA *COV_Subscribe_Data = NULL;
+/* flags to signal early termination */
+static bool Simple_Ack_Detected = false;
+static bool Cancel_Requested = false;
+
+static void MyErrorHandler(
+    BACNET_ADDRESS * src,
+    uint8_t invoke_id,
+    BACNET_ERROR_CLASS error_class,
+    BACNET_ERROR_CODE error_code)
+{
+    if (address_match(&Target_Address, src) &&
+        (invoke_id == Request_Invoke_ID)) {
+        printf("BACnet Error: %s: %s\r\n",
+            bactext_error_class_name((int) error_class),
+            bactext_error_code_name((int) error_code));
+        Error_Detected = true;
+    }
+}
+
+void MyAbortHandler(
+    BACNET_ADDRESS * src,
+    uint8_t invoke_id,
+    uint8_t abort_reason,
+    bool server)
+{
+    (void) server;
+    if (address_match(&Target_Address, src) &&
+        (invoke_id == Request_Invoke_ID)) {
+        printf("BACnet Abort: %s\r\n",
+            bactext_abort_reason_name((int) abort_reason));
+        Error_Detected = true;
+    }
+}
+
+void MyRejectHandler(
+    BACNET_ADDRESS * src,
+    uint8_t invoke_id,
+    uint8_t reject_reason)
+{
+    if (address_match(&Target_Address, src) &&
+        (invoke_id == Request_Invoke_ID)) {
+        printf("BACnet Reject: %s\r\n",
+            bactext_reject_reason_name((int) reject_reason));
+        Error_Detected = true;
+    }
+}
+
+void My_Unconfirmed_COV_Notification_Handler(
+    uint8_t * service_request,
+    uint16_t service_len,
+    BACNET_ADDRESS * src)
+{
+    handler_ucov_notification(service_request, service_len, src);
+}
+
+void My_Confirmed_COV_Notification_Handler(
+    uint8_t * service_request,
+    uint16_t service_len,
+    BACNET_ADDRESS * src,
+    BACNET_CONFIRMED_SERVICE_DATA * service_data)
+{
+    handler_ccov_notification(service_request, service_len, src, service_data);
+}
+
+void MyWritePropertySimpleAckHandler(
+    BACNET_ADDRESS * src,
+    uint8_t invoke_id)
+{
+    if (address_match(&Target_Address, src) &&
+        (invoke_id == Request_Invoke_ID)) {
+        printf("SubscribeCOV Acknowledged!\r\n");
+        Simple_Ack_Detected = true;
+    }
+}
+
+static void Init_Service_Handlers(
+    void)
+{
+    Device_Init(NULL);
+    /* we need to handle who-is
+       to support dynamic device binding to us */
+    apdu_set_unconfirmed_handler(SERVICE_UNCONFIRMED_WHO_IS, handler_who_is);
+    /* handle i-am to support binding to other devices */
+    apdu_set_unconfirmed_handler(SERVICE_UNCONFIRMED_I_AM, handler_i_am_bind);
+    /* set the handler for all the services we don't implement
+       It is required to send the proper reject message... */
+    apdu_set_unrecognized_service_handler_handler
+        (handler_unrecognized_service);
+    /* we must implement read property - it's required! */
+    apdu_set_confirmed_handler(SERVICE_CONFIRMED_READ_PROPERTY,
+        handler_read_property);
+    /* handle the data coming back from COV subscriptions */
+    apdu_set_confirmed_handler(SERVICE_CONFIRMED_COV_NOTIFICATION,
+        My_Confirmed_COV_Notification_Handler);
+    apdu_set_unconfirmed_handler(SERVICE_UNCONFIRMED_COV_NOTIFICATION,
+        My_Unconfirmed_COV_Notification_Handler);
+    /* handle the Simple ack coming back from SubscribeCOV */
+    apdu_set_confirmed_simple_ack_handler(SERVICE_CONFIRMED_SUBSCRIBE_COV,
+        MyWritePropertySimpleAckHandler);
+    /* handle any errors coming back */
+    apdu_set_error_handler(SERVICE_CONFIRMED_SUBSCRIBE_COV, MyErrorHandler);
+    apdu_set_abort_handler(MyAbortHandler);
+    apdu_set_reject_handler(MyRejectHandler);
+}
+
+void cleanup(
+    void)
+{
+    BACNET_SUBSCRIBE_COV_DATA *cov_data = NULL;
+    BACNET_SUBSCRIBE_COV_DATA *cov_data_old = NULL;
+
+    cov_data = COV_Subscribe_Data;
+    while (cov_data) {
+        cov_data_old = cov_data;
+        cov_data = cov_data->next;
+        free(cov_data_old);
+    }
+}
+
+int main(
+    int argc,
+    char *argv[])
+{
+    BACNET_ADDRESS src = {
+        0
+    };  /* address where message came from */
+    uint16_t pdu_len = 0;
+    unsigned timeout = 100;     /* milliseconds */
+    unsigned max_apdu = 0;
+    time_t elapsed_seconds = 0;
+    time_t last_seconds = 0;
+    time_t current_seconds = 0;
+    time_t timeout_seconds = 0;
+    time_t delta_seconds = 0;
+    bool found = false;
+    char *filename = NULL;
+    bool print_usage_terse = false;
+    bool print_usage_verbose = false;
+    BACNET_SUBSCRIBE_COV_DATA *cov_data = NULL;
+    int argi = 0;
+    int arg_remaining = 0;
+
+#if SECURITY_ENABLED
+    // initialize security wrapper
+    initialize_security_wrapper();
+
+    // set master key
+    BACNET_KEY_ENTRY key;
+    key.key_identifier = wrapper.key_identifier;
+    key.key_len = sizeof(KEY);
+    memcpy(key.key, &KEY, sizeof(KEY));
+
+    BACNET_SET_MASTER_KEY master;
+
+    memcpy(&master, &key, sizeof(BACNET_KEY_ENTRY));
+
+    if(bacnet_master_key_set(&master) != SEC_RESP_SUCCESS)
+    	return 0;
+#endif
+>>>>>>> refs/heads/bacnet-sec
 
     if (argc < 6) {
         print_usage_terse = true;

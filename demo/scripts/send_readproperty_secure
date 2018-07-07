@@ -1,0 +1,33 @@
+#!/bin/bash
+# Sending read-property request
+# Usage: bacrp device-instance object-type object-instance property [index]
+# For further information see bacenum.h in include folder
+# Example: read present-value from analog-output 1 on device 123
+# bacrp 123 1 0 85 
+
+# initialize request parameters
+device_instance=123
+object_type=1
+object_instance=0
+property=85
+
+if [ -z "$1" ]; then
+ n=1
+else
+ n=$1
+fi
+
+# send request n times
+counter=1
+while [ $counter -le $n ]
+do 
+    ../readprop/bacrp $device_instance $object_type $object_instance $property
+    sleep .01    
+    ((counter++))
+done
+
+# move and rename by timestamp
+filename=`date +%Y-%m-%d-%H-%M`
+dir="rpsec"
+filename+="-$dir"
+mv rp.dat measurements/$dir/$filename

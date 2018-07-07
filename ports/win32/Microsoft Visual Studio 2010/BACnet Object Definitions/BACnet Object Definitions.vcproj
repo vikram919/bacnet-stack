@@ -194,7 +194,11 @@
 				>
 			</File>
 			<File
+<<<<<<< HEAD
 				RelativePath="..\..\..\..\demo\object\msi.c"
+=======
+				RelativePath="..\..\..\..\demo\object\ms-input.c"
+>>>>>>> refs/heads/bacnet-sec
 				>
 			</File>
 			<File

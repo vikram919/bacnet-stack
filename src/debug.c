@@ -60,6 +60,10 @@ void debug_printf(
     const char *format,
     ...)
 {
+<<<<<<< HEAD
     unused_var(format);
+=======
+    format = format;
+>>>>>>> refs/heads/bacnet-sec
 }
 #endif

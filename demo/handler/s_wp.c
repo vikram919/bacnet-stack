@@ -43,6 +43,7 @@
 #include "txbuf.h"
 #include "client.h"
 
+<<<<<<< HEAD
 /** @file s_wp.c  Send a Write Property request. */
 
 /** returns the invoke ID for confirmed request, or zero on failure */
@@ -94,6 +95,86 @@ uint8_t Send_Write_Property_Request_Data(
         len =
             wp_encode_apdu(&Handler_Transmit_Buffer[pdu_len], invoke_id,
             &data);
+=======
+#if SECURITY_ENABLED
+
+#include "bacsec.h"
+#include "security.h"
+
+#endif
+
+/** @file s_wp.c  Send a Write Property request. */
+
+/** returns the invoke ID for confirmed request, or zero on failure */
+uint8_t Send_Write_Property_Request_Data(
+    uint32_t device_id,
+    BACNET_OBJECT_TYPE object_type,
+    uint32_t object_instance,
+    BACNET_PROPERTY_ID object_property,
+    uint8_t * application_data,
+    int application_data_len,
+    uint8_t priority,
+    uint32_t array_index)
+{
+    BACNET_ADDRESS dest = {0};
+    BACNET_ADDRESS my_address;
+    unsigned max_apdu = 0;
+    uint8_t invoke_id = 0;
+    bool status = false;
+    int len = 0;
+    int pdu_len = 0;
+    int bytes_sent = 0;
+    BACNET_WRITE_PROPERTY_DATA data;
+    BACNET_NPDU_DATA npdu_data;
+
+    if (!dcc_communication_enabled())
+        return 0;
+
+    /* is the device bound? */
+    status = address_get_by_device(device_id, &max_apdu, &dest);
+    /* is there a tsm available? */
+    if (status)
+        invoke_id = tsm_next_free_invokeID();
+    if (invoke_id) {
+        /* encode the NPDU portion of the packet */
+        datalink_get_my_address(&my_address);
+        npdu_encode_npdu_data(&npdu_data, true, MESSAGE_PRIORITY_NORMAL);
+
+#if SECURITY_ENABLED
+        set_npdu_data(&npdu_data, NETWORK_MESSAGE_SECURITY_PAYLOAD);
+#endif
+        pdu_len =
+            npdu_encode_pdu(&Handler_Transmit_Buffer[0], &dest, &my_address,
+            &npdu_data);
+        /* encode the APDU portion of the packet */
+        data.object_type = object_type;
+        data.object_instance = object_instance;
+        data.object_property = object_property;
+        data.array_index = array_index;
+        data.application_data_len = application_data_len;
+        memcpy(&data.application_data[0], &application_data[0],
+            application_data_len);
+        data.priority = priority;
+
+#if SECURITY_ENABLED
+
+        // setup security wrapper fields
+        set_security_wrapper_fields_static(device_id, &dest, &my_address);
+
+        wrapper.service_data_len =
+        		(uint8_t)wp_encode_apdu(&wrapper.service_data[2], invoke_id, &data);
+        encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
+
+        wrapper.service_data_len += 2;
+
+        len =
+           	encode_security_wrapper(1, &Handler_Transmit_Buffer[pdu_len], &wrapper);
+#else
+        len =
+            wp_encode_apdu(&Handler_Transmit_Buffer[pdu_len], invoke_id,
+            &data);
+#endif
+>>>>>>> refs/heads/bacnet-sec
         pdu_len += len;
         /* will it fit in the sender?
            note: if there is a bottleneck router in between

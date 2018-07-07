@@ -184,7 +184,11 @@ unsigned Device_Count(
 uint32_t Device_Index_To_Instance(
     unsigned index)
 {
+<<<<<<< HEAD
     unused_var(index);
+=======
+    index = index;
+>>>>>>> refs/heads/bacnet-sec
     return Object_Instance_Number;
 }
 

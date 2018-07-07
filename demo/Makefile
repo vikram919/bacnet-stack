@@ -24,6 +24,7 @@ INCLUDES = $(INCLUDE1) $(INCLUDE2)
 BACNET_LIB := -L$(BACNET_LIB_DIR),-l$(BACNET_LIB_NAME)
 # build for UCI
 ifneq (,$(findstring -DBAC_UCI,$(BACNET_DEFINES)))
+<<<<<<< HEAD
 BACNET_LIB := $(BACNET_LIB),-L$(UCI_LIB_DIR),-luci,-lubox
 endif
 # OS specific builds
@@ -44,6 +45,29 @@ endif
 #build for release (default) or debug
 DEBUGGING =
 OPTIMIZATION = -O0
+=======
+BACNET_LIB = $(BACNET_LIB),-L$(UCI_LIB_DIR),-luci
+endif
+# OS specific builds
+ifeq (${BACNET_PORT},linux)
+PFLAGS = -pthread
+TARGET_EXT =
+SYSTEM_LIB=-lc,-lgcc,-lrt,-lm,-lcrypto
+endif
+ifeq (${BACNET_PORT},bsd)
+PFLAGS = -pthread
+TARGET_EXT =
+SYSTEM_LIB=-lc,-lm
+endif
+ifeq (${BACNET_PORT},win32)
+TARGET_EXT = .exe
+SYSTEM_LIB=-lws2_32,-lgcc,-lm,-liphlpapi,-lwinmm
+DEFINES += -D_NO_OLDNAMES
+endif
+#build for release (default) or debug
+DEBUGGING =
+OPTIMIZATION = -Os
+>>>>>>> refs/heads/bacnet-sec
 ifeq (${BUILD},debug)
 OPTIMIZATION = -O0
 DEBUGGING = -g -DDEBUG_ENABLED=1

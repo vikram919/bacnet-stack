@@ -1,0 +1,11 @@
+#!/bin/bash
+# copy measurements from remote host using ip from arg1
+
+if [ -z "$1" ]; then
+ echo "Please enter IP!"
+else
+ echo "Copying measurements from remote host to local host..."
+ scp -r pi@$1:/home/pi/stack/bacnet-security/demo/scripts/measurements/* measurements
+fi
+
+

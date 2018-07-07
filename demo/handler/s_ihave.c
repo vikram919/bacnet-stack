@@ -43,6 +43,7 @@
 #include "txbuf.h"
 #include "client.h"
 
+<<<<<<< HEAD
 /** @file s_ihave.c  Send an I-Have (property) message. */
 
 /** Broadcast an I Have message.
@@ -86,6 +87,77 @@ void Send_I_Have(
     data.object_id.instance = object_instance;
     characterstring_copy(&data.object_name, object_name);
     len = ihave_encode_apdu(&Handler_Transmit_Buffer[pdu_len], &data);
+=======
+#if SECURITY_ENABLED
+
+#include "bacsec.h"
+#include "security.h"
+
+#endif
+
+/** @file s_ihave.c  Send an I-Have (property) message. */
+
+/** Broadcast an I Have message.
+ * @ingroup DMDOB
+ *
+ * @param device_id [in] My device ID.
+ * @param object_type [in] The BACNET_OBJECT_TYPE that I Have.
+ * @param object_instance [in] The Object ID that I Have.
+ * @param object_name [in] The Name of the Object I Have.
+ */
+void Send_I_Have(
+    uint32_t device_id,
+    BACNET_OBJECT_TYPE object_type,
+    uint32_t object_instance,
+    BACNET_CHARACTER_STRING * object_name)
+{
+    int len = 0;
+    int pdu_len = 0;
+    BACNET_ADDRESS dest;
+    int bytes_sent = 0;
+    BACNET_I_HAVE_DATA data;
+    BACNET_NPDU_DATA npdu_data;
+    BACNET_ADDRESS my_address;
+
+    datalink_get_my_address(&my_address);
+    /* if we are forbidden to send, don't send! */
+    if (!dcc_communication_enabled())
+        return;
+    /* Who-Has is a global broadcast */
+    datalink_get_broadcast_address(&dest);
+    /* encode the NPDU portion of the packet */
+    npdu_encode_npdu_data(&npdu_data, false, MESSAGE_PRIORITY_NORMAL);
+
+#if SECURITY_ENABLED
+        set_npdu_data(&npdu_data, NETWORK_MESSAGE_SECURITY_PAYLOAD);
+#endif
+
+    pdu_len =
+        npdu_encode_pdu(&Handler_Transmit_Buffer[0], &dest, &my_address,
+        &npdu_data);
+
+    /* encode the APDU portion of the packet */
+    data.device_id.type = OBJECT_DEVICE;
+    data.device_id.instance = device_id;
+    data.object_id.type = object_type;
+    data.object_id.instance = object_instance;
+    characterstring_copy(&data.object_name, object_name);
+
+#if SECURITY_ENABLED
+    // setup security wrapper fields
+    set_security_wrapper_fields_static(device_id, &dest, &my_address);
+
+    wrapper.service_data_len = ihave_encode_apdu(&wrapper.service_data[2], &data);
+    encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
+
+    wrapper.service_data_len += 2;
+
+    len =
+    	encode_security_wrapper(1, &Handler_Transmit_Buffer[pdu_len], &wrapper);
+#else
+    len = ihave_encode_apdu(&Handler_Transmit_Buffer[pdu_len], &data);
+#endif
+>>>>>>> refs/heads/bacnet-sec
     pdu_len += len;
     /* send the data */
     bytes_sent =

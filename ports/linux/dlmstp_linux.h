@@ -26,9 +26,13 @@
 
 #include "mstp.h"
 /*#include "dlmstp.h" */
+<<<<<<< HEAD
 /*#include "bits/pthreadtypes.h"*/
 #include <pthread.h>
 #include <sys/time.h>
+=======
+#include "bits/pthreadtypes.h"
+>>>>>>> refs/heads/bacnet-sec
 #include <semaphore.h>
 
 #include <stdbool.h>

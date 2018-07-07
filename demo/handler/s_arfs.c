@@ -43,6 +43,7 @@
 #include "txbuf.h"
 #include "client.h"
 
+<<<<<<< HEAD
 /** @file s_arfs.c  Send part of an Atomic Read File Stream. */
 
 uint8_t Send_Atomic_Read_File_Stream(
@@ -87,6 +88,77 @@ uint8_t Send_Atomic_Read_File_Stream(
         len =
             arf_encode_apdu(&Handler_Transmit_Buffer[pdu_len], invoke_id,
             &data);
+=======
+#if SECURITY_ENABLED
+
+#include "bacsec.h"
+#include "security.h"
+
+#endif
+
+/** @file s_arfs.c  Send part of an Atomic Read File Stream. */
+
+uint8_t Send_Atomic_Read_File_Stream(
+    uint32_t device_id,
+    uint32_t file_instance,
+    int fileStartPosition,
+    unsigned requestedOctetCount)
+{
+    BACNET_ADDRESS dest;
+    BACNET_ADDRESS my_address;
+    BACNET_NPDU_DATA npdu_data;
+    unsigned max_apdu = 0;
+    uint8_t invoke_id = 0;
+    bool status = false;
+    int len = 0;
+    int pdu_len = 0;
+    int bytes_sent = 0;
+    BACNET_ATOMIC_READ_FILE_DATA data;
+
+    /* if we are forbidden to send, don't send! */
+    if (!dcc_communication_enabled())
+        return 0;
+
+    /* is the device bound? */
+    status = address_get_by_device(device_id, &max_apdu, &dest);
+    /* is there a tsm available? */
+    if (status)
+        invoke_id = tsm_next_free_invokeID();
+    if (invoke_id) {
+        /* load the data for the encoding */
+        data.object_type = OBJECT_FILE;
+        data.object_instance = file_instance;
+        data.access = FILE_STREAM_ACCESS;
+        data.type.stream.fileStartPosition = fileStartPosition;
+        data.type.stream.requestedOctetCount = requestedOctetCount;
+        /* encode the NPDU portion of the packet */
+        datalink_get_my_address(&my_address);
+        npdu_encode_npdu_data(&npdu_data, true, MESSAGE_PRIORITY_NORMAL);
+
+#if SECURITY_ENABLED
+        set_npdu_data(&npdu_data, NETWORK_MESSAGE_SECURITY_PAYLOAD);
+#endif
+        pdu_len =
+            npdu_encode_pdu(&Handler_Transmit_Buffer[0], &dest, &my_address,
+            &npdu_data);
+#if SECURITY_ENABLED
+        // setup security wrapper fields
+        set_security_wrapper_fields_static(device_id, &dest, &my_address);
+
+        wrapper.service_data_len = arf_encode_apdu(&wrapper.service_data[2],
+        		invoke_id, &data);
+        encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
+
+        wrapper.service_data_len += 2;
+
+        len =
+           	encode_security_wrapper(1, &Handler_Transmit_Buffer[pdu_len], &wrapper);
+#else
+        len =
+            arf_encode_apdu(&Handler_Transmit_Buffer[pdu_len], invoke_id,
+            &data);
+#endif
+>>>>>>> refs/heads/bacnet-sec
         pdu_len += len;
         /* will the APDU fit the target device?
            note: if there is a bottleneck router in between

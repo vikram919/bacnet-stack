@@ -142,7 +142,11 @@ int lighting_command_decode(
     uint32_t unsigned_value = 0;
     float real_value = 0.0;
 
+<<<<<<< HEAD
     unused_var(apdu_max_len);
+=======
+    apdu_max_len = apdu_max_len;
+>>>>>>> refs/heads/bacnet-sec
     /* check for value pointers */
     if (apdu_max_len && data) {
         /* Tag 0: operation */

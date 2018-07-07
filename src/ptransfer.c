@@ -55,7 +55,11 @@ static int pt_encode_apdu(
     }
 */
     /* unused parameter */
+<<<<<<< HEAD
     unused_var(max_apdu);
+=======
+    max_apdu = max_apdu;
+>>>>>>> refs/heads/bacnet-sec
     if (apdu) {
         len =
             encode_context_unsigned(&apdu[apdu_len], 0,

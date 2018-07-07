@@ -69,7 +69,11 @@ void handler_ucov_notification(
     unsigned index = 0;
 
     /* src not needed for this application */
+<<<<<<< HEAD
     unused_var(src);
+=======
+    src = src;
+>>>>>>> refs/heads/bacnet-sec
     /* create linked list to store data if more
        than one property value is expected */
     pProperty_value = &property_value[0];

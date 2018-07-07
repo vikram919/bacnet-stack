@@ -13,7 +13,13 @@ SRCS = ao.c \
 	$(SRC_DIR)/bacstr.c \
 	$(SRC_DIR)/bacreal.c \
 	$(SRC_DIR)/datetime.c \
+<<<<<<< HEAD
 	$(SRC_DIR)/bacapp.c \
+=======
+	$(SRC_DIR)/lighting.c \
+	$(SRC_DIR)/bacapp.c \
+	$(SRC_DIR)/bacdevobjpropref.c \
+>>>>>>> refs/heads/bacnet-sec
 	$(SRC_DIR)/bactext.c \
 	$(SRC_DIR)/indtext.c \
 	$(TEST_DIR)/ctest.c

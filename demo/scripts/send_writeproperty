@@ -1,0 +1,31 @@
+#!/bin/bash
+# Sending write-property request
+# Usage: bacwp device-instance object-type object-instance property priority index tag value [tag value...]
+# value can be optional input argument
+# For further information see bacenum.h in include folder
+# Example: write value of 100 to analog-output 1 of device 123 at priority 16
+# bacwp 123 1 0 85 16 -1 4 100
+
+device_instance=123
+object_type=1
+object_instance=0
+property=85
+priority=16
+index=-1
+tag=4
+value=${1:-100}
+
+# send request n times
+counter=1
+while [ $counter -le 1 ]
+do 
+    ../writeprop/bacwp $device_instance $object_type $object_instance $property $priority $index $tag $value
+    sleep .01    
+    ((counter++))
+done
+
+# move and rename by timestamp
+filename=`date +%Y-%m-%d-%H-%M`
+filename+="-wp"
+mv rp.dat measurements/$filename
+

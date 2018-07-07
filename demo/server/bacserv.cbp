@@ -102,10 +102,17 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="..\object\lsp.h" />
+<<<<<<< HEAD
 		<Unit filename="..\object\msi.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="..\object\msi.h" />
+=======
+		<Unit filename="..\object\ms-input.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\object\ms-input.h" />
+>>>>>>> refs/heads/bacnet-sec
 		<Unit filename="..\object\mso.c">
 			<Option compilerVar="CC" />
 		</Unit>

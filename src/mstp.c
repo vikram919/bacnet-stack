@@ -649,6 +649,7 @@ bool MSTP_Master_Node_FSM(
                             break;
                         case FRAME_TYPE_POLL_FOR_MASTER:
                             /* ReceivedPFM */
+<<<<<<< HEAD
                             /* DestinationAddress is equal to TS */
                             if (mstp_port->DestinationAddress ==
                                 mstp_port->This_Station) {
@@ -657,6 +658,12 @@ bool MSTP_Master_Node_FSM(
                                     mstp_port->SourceAddress,
                                     mstp_port->This_Station, NULL, 0);
                             }
+=======
+                            MSTP_Create_And_Send_Frame(mstp_port,
+                                FRAME_TYPE_REPLY_TO_POLL_FOR_MASTER,
+                                mstp_port->SourceAddress,
+                                mstp_port->This_Station, NULL, 0);
+>>>>>>> refs/heads/bacnet-sec
                             break;
                         case FRAME_TYPE_BACNET_DATA_NOT_EXPECTING_REPLY:
                             /* indicate successful reception to the higher layers */

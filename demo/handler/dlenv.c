@@ -254,8 +254,12 @@ void dlenv_init(
         bip6_set_broadcast_addr(&addr);
     } else {
         bvlc6_address_set(&addr,
+<<<<<<< HEAD
                 BIP6_MULTICAST_GLOBAL, 0, 0, 0, 0, 0, 0,
                 //BIP6_MULTICAST_SITE_LOCAL, 0, 0, 0, 0, 0, 0,
+=======
+                BIP6_MULTICAST_SITE_LOCAL, 0, 0, 0, 0, 0, 0,
+>>>>>>> refs/heads/bacnet-sec
                 BIP6_MULTICAST_GROUP_ID);
         bip6_set_broadcast_addr(&addr);
     }

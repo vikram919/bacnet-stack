@@ -44,6 +44,7 @@
 #include "txbuf.h"
 #include "client.h"
 
+<<<<<<< HEAD
 /** @file s_whois.c  Send a Who-Is request. */
 
 /** Send a Who-Is request to a remote network for a specific device, a range,
@@ -78,6 +79,68 @@ void Send_WhoIs_To_Network(
     len =
         whois_encode_apdu(&Handler_Transmit_Buffer[pdu_len], low_limit,
         high_limit);
+=======
+#if SECURITY_ENABLED
+
+#include "bacsec.h"
+#include "security.h"
+
+#endif
+
+/** @file s_whois.c  Send a Who-Is request. */
+
+/** Send a Who-Is request to a remote network for a specific device, a range,
+ * or any device.
+ * If low_limit and high_limit both are -1, then the range is unlimited.
+ * If low_limit and high_limit have the same non-negative value, then only
+ * that device will respond.
+ * Otherwise, low_limit must be less than high_limit.
+ * @param target_address [in] BACnet address of target router
+ * @param low_limit [in] Device Instance Low Range, 0 - 4,194,303 or -1
+ * @param high_limit [in] Device Instance High Range, 0 - 4,194,303 or -1
+ */
+void Send_WhoIs_To_Network(
+    BACNET_ADDRESS * target_address,
+    int32_t low_limit,
+    int32_t high_limit)
+{
+    int len = 0;
+    int pdu_len = 0;
+    int bytes_sent = 0;
+    BACNET_NPDU_DATA npdu_data;
+    BACNET_ADDRESS my_address;
+
+    datalink_get_my_address(&my_address);
+    /* encode the NPDU portion of the packet */
+    npdu_encode_npdu_data(&npdu_data, false, MESSAGE_PRIORITY_NORMAL);
+
+#if SECURITY_ENABLED
+        set_npdu_data(&npdu_data, NETWORK_MESSAGE_SECURITY_PAYLOAD);
+#endif
+    pdu_len =
+        npdu_encode_pdu(&Handler_Transmit_Buffer[0], target_address,
+        &my_address, &npdu_data);
+#if SECURITY_ENABLED
+
+    // setup security wrapper fields
+    set_security_wrapper_fields_static(1, target_address, &my_address);
+
+    wrapper.service_data_len = whois_encode_apdu(&wrapper.service_data[2], low_limit,
+            high_limit);
+
+    encode_unsigned16(&wrapper.service_data[0], wrapper.service_data_len);
+
+    wrapper.service_data_len += 2;
+
+    len =
+        encode_security_wrapper(1, &Handler_Transmit_Buffer[pdu_len], &wrapper);
+#else
+    /* encode the APDU portion of the packet */
+    len =
+        whois_encode_apdu(&Handler_Transmit_Buffer[pdu_len], low_limit,
+        high_limit);
+#endif
+>>>>>>> refs/heads/bacnet-sec
     pdu_len += len;
     bytes_sent =
         datalink_send_pdu(target_address, &npdu_data,
