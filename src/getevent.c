@@ -118,65 +118,6 @@ int getevent_ack_encode_apdu_data(
     unsigned i = 0;     /* counter */
 
     /* unused parameter */
-<<<<<<< HEAD
-    unused_var(max_apdu);
-    if (apdu) {
-        event_data = get_event_data;
-        while (event_data) {
-            /* Tag 0: objectIdentifier */
-            apdu_len +=
-                encode_context_object_id(&apdu[apdu_len], 0,
-                (int) event_data->objectIdentifier.type,
-                event_data->objectIdentifier.instance);
-            /* Tag 1: eventState */
-            apdu_len +=
-                encode_context_enumerated(&apdu[apdu_len], 1,
-                event_data->eventState);
-            /* Tag 2: acknowledgedTransitions */
-            apdu_len +=
-                encode_context_bitstring(&apdu[apdu_len], 2,
-                &event_data->acknowledgedTransitions);
-            /* Tag 3: eventTimeStamps */
-            apdu_len += encode_opening_tag(&apdu[apdu_len], 3);
-            for (i = 0; i < 3; i++) {
-                apdu_len +=
-                    bacapp_encode_timestamp(&apdu[apdu_len],
-                    &event_data->eventTimeStamps[i]);
-            }
-            apdu_len += encode_closing_tag(&apdu[apdu_len], 3);
-            /* Tag 4: notifyType */
-            apdu_len +=
-                encode_context_enumerated(&apdu[apdu_len], 4,
-                event_data->notifyType);
-            /* Tag 5: eventEnable */
-            apdu_len +=
-                encode_context_bitstring(&apdu[apdu_len], 5,
-                &event_data->eventEnable);
-            /* Tag 6: eventPriorities */
-            apdu_len += encode_opening_tag(&apdu[apdu_len], 6);
-            for (i = 0; i < 3; i++) {
-                apdu_len +=
-                    encode_application_unsigned(&apdu[apdu_len],
-                    event_data->eventPriorities[i]);
-            }
-            apdu_len += encode_closing_tag(&apdu[apdu_len], 6);
-            event_data = event_data->next;
-        }
-    }
-
-    return apdu_len;
-}
-
-int getevent_ack_encode_apdu_end(
-    uint8_t * apdu,
-    size_t max_apdu,
-    bool moreEvents)
-{
-    int apdu_len = 0;   /* total length of the apdu, return value */
-
-    /* unused parameter */
-    unused_var(max_apdu);
-=======
     max_apdu = max_apdu;
     if (apdu) {
         event_data = get_event_data;
@@ -234,7 +175,6 @@ int getevent_ack_encode_apdu_end(
 
     /* unused parameter */
     max_apdu = max_apdu;
->>>>>>> refs/heads/bacnet-sec
     if (apdu) {
         apdu_len += encode_closing_tag(&apdu[apdu_len], 0);
         apdu_len += encode_context_boolean(&apdu[apdu_len], 1, moreEvents);

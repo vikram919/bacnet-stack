@@ -22,32 +22,6 @@ BACNET_DEFINES ?= $(MY_BACNET_DEFINES)
 # un-comment the next line to build in uci integration
 #BACNET_DEFINES += -DBAC_UCI
 #UCI_LIB_DIR ?= /usr/local/lib
-<<<<<<< HEAD
-#UCI_INCLUDE_DIR ?= /usr/local/include
-
-#BACDL_DEFINE=-DBACDL_ETHERNET=1
-#BACDL_DEFINE=-DBACDL_ARCNET=1
-#BACDL_DEFINE=-DBACDL_MSTP=1
-BACDL_DEFINE?=-DBACDL_BIP=1
-
-# Declare your level of BBMD support
-BBMD_DEFINE ?=-DBBMD_ENABLED=1
-#BBMD_DEFINE ?= -DBBMD_ENABLED=0
-#BBMD_DEFINE ?= -DBBMD_CLIENT_ENABLED
-
-# Passing parameters via command line
-MAKE_DEFINE ?=
-
-# Define WEAK_FUNC for [...somebody help here; I can't find any uses of it]
-DEFINES = $(BACNET_DEFINES) $(BACDL_DEFINE) $(BBMD_DEFINE) -DWEAK_FUNC=
-DEFINES += $(MAKE_DEFINE)
-
-# BACnet Ports Directory
-BACNET_PORT ?= linux
-
-# Default compiler settings
-OPTIMIZATION = -O0
-=======
 
 #BACDL_DEFINE=-DBACDL_ETHERNET=1
 #BACDL_DEFINE=-DBACDL_ARCNET=1
@@ -71,7 +45,6 @@ BACNET_PORT ?= linux
 
 # Default compiler settings
 OPTIMIZATION = -Os
->>>>>>> refs/heads/bacnet-sec
 DEBUGGING =
 WARNINGS = -Wall -Wmissing-prototypes
 ifeq (${BUILD},debug)

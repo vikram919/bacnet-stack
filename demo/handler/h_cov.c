@@ -215,11 +215,7 @@ static int cov_encode_subscription(
 
 
     /* FIXME: unused parameter */
-<<<<<<< HEAD
-    unused_var(max_apdu);
-=======
     max_apdu = max_apdu;
->>>>>>> refs/heads/bacnet-sec
     if (!cov_subscription) {
         return 0;
     }

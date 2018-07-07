@@ -226,80 +226,6 @@ extern "C" {
 
     bool Device_Reinitialize(
         BACNET_REINITIALIZE_DEVICE_DATA * rd_data);
-<<<<<<< HEAD
-
-    BACNET_REINITIALIZED_STATE Device_Reinitialized_State(
-        void);
-
-    rr_info_function Device_Objects_RR_Info(
-        BACNET_OBJECT_TYPE object_type);
-
-    void Device_getCurrentDateTime(
-        BACNET_DATE_TIME * DateTime);
-
-    int32_t Device_UTC_Offset(void);
-    void Device_UTC_Offset_Set(int16_t offset);
-
-    bool Device_Daylight_Savings_Status(void);
-    bool Device_Align_Intervals(void);
-    bool Device_Align_Intervals_Set(bool flag);
-    uint32_t Device_Time_Sync_Interval(void);
-    bool Device_Time_Sync_Interval_Set(uint32_t value);
-    uint32_t Device_Interval_Offset(void);
-    bool Device_Interval_Offset_Set(uint32_t value);
-
-    void Device_Property_Lists(
-        const int **pRequired,
-        const int **pOptional,
-        const int **pProprietary);
-    void Device_Objects_Property_List(
-        BACNET_OBJECT_TYPE object_type,
-        uint32_t object_instance,
-        struct special_property_list_t *pPropertyList);
-    /* functions to support COV */
-    bool Device_Encode_Value_List(
-        BACNET_OBJECT_TYPE object_type,
-        uint32_t object_instance,
-        BACNET_PROPERTY_VALUE * value_list);
-    bool Device_Value_List_Supported(
-        BACNET_OBJECT_TYPE object_type);
-    bool Device_COV(
-        BACNET_OBJECT_TYPE object_type,
-        uint32_t object_instance);
-    void Device_COV_Clear(
-        BACNET_OBJECT_TYPE object_type,
-        uint32_t object_instance);
-
-    uint32_t Device_Object_Instance_Number(
-        void);
-    bool Device_Set_Object_Instance_Number(
-        uint32_t object_id);
-    bool Device_Valid_Object_Instance_Number(
-        uint32_t object_id);
-    unsigned Device_Object_List_Count(
-        void);
-    bool Device_Object_List_Identifier(
-        uint32_t array_index,
-        int *object_type,
-        uint32_t * instance);
-
-    unsigned Device_Count(
-        void);
-    uint32_t Device_Index_To_Instance(
-        unsigned index);
-
-    bool Device_Object_Name(
-        uint32_t object_instance,
-        BACNET_CHARACTER_STRING * object_name);
-    bool Device_Set_Object_Name(
-        BACNET_CHARACTER_STRING * object_name);
-    /* Copy a child object name, given its ID. */
-    bool Device_Object_Name_Copy(
-        BACNET_OBJECT_TYPE object_type,
-        uint32_t object_instance,
-        BACNET_CHARACTER_STRING * object_name);
-    bool Device_Object_Name_ANSI_Init(const char * object_name);
-=======
     bool Device_Reinitialize_State_Set(BACNET_REINITIALIZED_STATE state);
     BACNET_REINITIALIZED_STATE Device_Reinitialized_State(
         void);
@@ -373,7 +299,6 @@ extern "C" {
         BACNET_CHARACTER_STRING * object_name);
     bool Device_Object_Name_ANSI_Init(const char * object_name);
     char * Device_Object_Name_ANSI(void);
->>>>>>> refs/heads/bacnet-sec
 
     BACNET_DEVICE_STATUS Device_System_Status(
         void);

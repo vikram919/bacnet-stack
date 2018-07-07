@@ -759,11 +759,7 @@ int address_list_encode(
     /* FIXME: I really shouild check the length remaining here but it is
        fairly pointless until we have the true length remaining in
        the packet to work with as at the moment it is just MAX_APDU */
-<<<<<<< HEAD
-    unused_var(apdu_len);
-=======
     apdu_len = apdu_len;
->>>>>>> refs/heads/bacnet-sec
     /* look for matching address */
     pMatch = Address_Cache;
     while (pMatch <= &Address_Cache[MAX_ADDRESS_CACHE - 1]) {

@@ -81,111 +81,6 @@ extern "C" {
 #define TL_T_STOP_WILD  2       /* Stop Time is wild carded */
 
 #define TL_MAX_ENTRIES 1000     /* Entries per datalog */
-<<<<<<< HEAD
-#define TL_INIT_ENTRIES 0       /* Entries per datalog */
-
-/* Structure containing config and status info for a Trend Log */
-
-    typedef struct trend_log_descr {
-        uint32_t Instance;
-        char Object_Name[64];
-        char Object_Description[64];
-        bool Disable;
-        char Int_type;
-        char Int_name;
-        bool bEnable;   /* Trend log is active when this is true */
-        BACNET_DATE_TIME StartTime;     /* BACnet format start time */
-        time_t tStartTime;      /* Local time working copy of start time */
-        BACNET_DATE_TIME StopTime;      /* BACnet format stop time */
-        time_t tStopTime;       /* Local time working copy of stop time */
-        uint8_t ucTimeFlags;    /* Shorthand info on times */
-        BACNET_DEVICE_OBJECT_PROPERTY_REFERENCE Source; /* Where the data comes from */
-        uint32_t ulLogInterval; /* Time between entries in seconds */
-        bool bStopWhenFull;     /* Log halts when full if true */
-        uint32_t ulRecordCount; /* Count of items currently in the buffer */
-        uint32_t ulTotalRecordCount;    /* Count of all items that have ever been inserted into the buffer */
-        BACNET_LOGGING_TYPE LoggingType;        /* Polled/cov/triggered */
-        bool bAlignIntervals;   /* If true align to the clock */
-        uint32_t ulIntervalOffset;      /* Offset from start of period for taking reading in seconds */
-        bool bTrigger;  /* Set to 1 to cause a reading to be taken */
-        int iIndex;     /* Current insertion point */
-        time_t tLastDataTime;
-    } TREND_LOG_DESCR;
-
-/*
- * Data types associated with a BACnet Log Record. We use these for managing the
- * log buffer but they are also the tag numbers to use when encoding/decoding
- * the log datum field.
- */
-
-#define TL_TYPE_STATUS  0
-#define TL_TYPE_BOOL    1
-#define TL_TYPE_REAL    2
-#define TL_TYPE_ENUM    3
-#define TL_TYPE_UNSIGN  4
-#define TL_TYPE_SIGN    5
-#define TL_TYPE_BITS    6
-#define TL_TYPE_NULL    7
-#define TL_TYPE_ERROR   8
-#define TL_TYPE_DELTA   9
-#define TL_TYPE_ANY     10      /* We don't support this particular can of worms! */
-
-/* value/name tuples */
-struct tl_inst_tuple {
-	char idx[18];
-	struct tl_inst_tuple *next;
-};
-
-typedef struct tl_inst_tuple tl_inst_tuple_t;
-
-/* structure to hold tuple-list and uci context during iteration */
-struct tl_inst_itr_ctx {
-	struct tl_inst_tuple *list;
-	struct uci_context *ctx;
-	char *section;
-};
-
-
-	void Trend_Log_Load_UCI_List(
-		const char *sec_idx,
-		struct tl_inst_itr_ctx *itr);
-
-
-    void Trend_Log_Property_Lists(
-        const int **pRequired,
-        const int **pOptional,
-        const int **pProprietary);
-
-    bool Trend_Log_Valid_Instance(
-        uint32_t object_instance);
-
-    unsigned Trend_Log_Count(
-        void);
-
-    uint32_t Trend_Log_Index_To_Instance(
-        unsigned index);
-
-    unsigned Trend_Log_Instance_To_Index(
-        uint32_t instance);
-
-    bool Trend_Log_Object_Instance_Add(
-        uint32_t instance);
-
-    bool Trend_Log_Object_Name(
-        uint32_t object_instance,
-        BACNET_CHARACTER_STRING * object_name);
-
-    int Trend_Log_Read_Property(
-        BACNET_READ_PROPERTY_DATA * rpdata);
-
-    bool Trend_Log_Description_Set(
-        uint32_t object_instance,
-        char *text_string);
-
-    bool Trend_Log_Write_Property(
-        BACNET_WRITE_PROPERTY_DATA * wp_data);
-
-=======
 
 /* Structure containing config and status info for a Trend Log */
 
@@ -253,7 +148,6 @@ struct tl_inst_itr_ctx {
 
     bool Trend_Log_Write_Property(
         BACNET_WRITE_PROPERTY_DATA * wp_data);
->>>>>>> refs/heads/bacnet-sec
     void Trend_Log_Init(
         void);
 

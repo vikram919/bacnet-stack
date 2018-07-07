@@ -14,28 +14,6 @@ SRCS = mso.c \
 	$(SRC_DIR)/bacreal.c \
 	$(SRC_DIR)/datetime.c \
 	$(SRC_DIR)/bacapp.c \
-<<<<<<< HEAD
-	$(SRC_DIR)/bactext.c \
-	$(SRC_DIR)/indtext.c \
-	$(TEST_DIR)/ctest.c
-
-TARGET = multistate_output
-
-all: ${TARGET}
- 
-OBJS = ${SRCS:.c=.o}
-
-${TARGET}: ${OBJS}
-	${CC} -o $@ ${OBJS} 
-
-.c.o:
-	${CC} -c ${CFLAGS} $*.c -o $@
-	
-depend:
-	rm -f .depend
-	${CC} -MM ${CFLAGS} *.c >> .depend
-	
-=======
 	$(SRC_DIR)/bacdevobjpropref.c \
 	$(SRC_DIR)/bactext.c \
 	$(SRC_DIR)/indtext.c \
@@ -58,7 +36,6 @@ depend:
 	rm -f .depend
 	${CC} -MM ${CFLAGS} *.c >> .depend
 
->>>>>>> refs/heads/bacnet-sec
 clean:
 	rm -rf core ${TARGET} $(OBJS)
 

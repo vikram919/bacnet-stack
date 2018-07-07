@@ -199,13 +199,8 @@ void handler_conf_private_trans_ack(
  * we were expecting. But this is just to silence some compiler
  * warnings from Borland.
  */
-<<<<<<< HEAD
-    unused_var(src);
-    unused_var(service_data);
-=======
     src = src;
     service_data = service_data;
->>>>>>> refs/heads/bacnet-sec
 
     len = 0;
 

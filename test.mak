@@ -217,115 +217,6 @@ wp: logfile test/wp.mak
 	$(MAKE) -s -C test -f wp.mak clean
 
 objects: ai ao av bi bo bv csv lc lo lso lsp \
-<<<<<<< HEAD
-	mso msv msi osv piv command \
-	access_credential access_door access_point access_rights \
-	access_user access_zone credential_data_input
-
-access_credential: logfile demo/object/access_credential.mak
-	$(MAKE) -s -C demo/object -f access_credential.mak clean all
-	( ./demo/object/access_credential >> ${LOGFILE} )
-	$(MAKE) -s -C demo/object -f access_credential.mak clean
-
-access_door: logfile demo/object/access_door.mak
-	$(MAKE) -s -C demo/object -f access_door.mak clean all
-	( ./demo/object/access_door >> ${LOGFILE} )
-	$(MAKE) -s -C demo/object -f access_door.mak clean
-
-access_point: logfile demo/object/access_point.mak
-	$(MAKE) -s -C demo/object -f access_point.mak clean all
-	( ./demo/object/access_point >> ${LOGFILE} )
-	$(MAKE) -s -C demo/object -f access_point.mak clean
-
-access_rights: logfile demo/object/access_rights.mak
-	$(MAKE) -s -C demo/object -f access_rights.mak clean all
-	( ./demo/object/access_rights >> ${LOGFILE} )
-	$(MAKE) -s -C demo/object -f access_rights.mak clean
-
-access_user: logfile demo/object/access_user.mak
-	$(MAKE) -s -C demo/object -f access_user.mak clean all
-	( ./demo/object/access_user >> ${LOGFILE} )
-	$(MAKE) -s -C demo/object -f access_user.mak clean
-
-access_zone: logfile demo/object/access_zone.mak
-	$(MAKE) -s -C demo/object -f access_zone.mak clean all
-	( ./demo/object/access_zone >> ${LOGFILE} )
-	$(MAKE) -s -C demo/object -f access_zone.mak clean
-
-credential_data_input: logfile demo/object/credential_data_input.mak
-	$(MAKE) -s -C demo/object -f credential_data_input.mak clean all
-	( ./demo/object/credential_data_input >> ${LOGFILE} )
-	$(MAKE) -s -C demo/object -f credential_data_input.mak clean
-
-ai: logfile demo/object/ai.mak
-	$(MAKE) -s -C demo/object -f ai.mak clean all
-	( ./demo/object/analog_input >> ${LOGFILE} )
-	$(MAKE) -s -C demo/object -f ai.mak clean
-
-ao: logfile demo/object/ao.mak
-	$(MAKE) -s -C demo/object -f ao.mak clean all
-	( ./demo/object/analog_output >> ${LOGFILE} )
-	$(MAKE) -s -C demo/object -f ao.mak clean
-
-av: logfile demo/object/av.mak
-	$(MAKE) -s -C demo/object -f av.mak clean all
-	( ./demo/object/analog_value >> ${LOGFILE} )
-	$(MAKE) -s -C demo/object -f av.mak clean
-
-bi: logfile demo/object/bi.mak
-	$(MAKE) -s -C demo/object -f bi.mak clean all
-	$(MAKE) -s -C demo/object -f bi.mak clean
-
-bo: logfile demo/object/bo.mak
-	$(MAKE) -s -C demo/object -f bo.mak clean all
-	( ./demo/object/binary_output >> ${LOGFILE} )
-	$(MAKE) -s -C demo/object -f bo.mak clean
-
-bv: logfile demo/object/bv.mak
-	$(MAKE) -s -C demo/object -f bv.mak clean all
-	( ./demo/object/binary_value >> ${LOGFILE} )
-	$(MAKE) -s -C demo/object -f bv.mak clean
-
-command: logfile demo/object/command.mak
-	$(MAKE) -s -C demo/object -f command.mak clean all
-	( ./demo/object/command >> ${LOGFILE} )
-	$(MAKE) -s -C demo/object -f command.mak clean
-
-csv: logfile demo/object/csv.mak
-	$(MAKE) -s -C demo/object -f csv.mak clean all
-	( ./demo/object/characterstring_value >> ${LOGFILE} )
-	$(MAKE) -s -C demo/object -f csv.mak clean
-
-device: logfile demo/object/device.mak
-	$(MAKE) -s -C demo/object -f device.mak clean all
-	( ./demo/object/device >> ${LOGFILE} )
-	$(MAKE) -s -C demo/object -f device.mak clean
-
-lc: logfile demo/object/lc.mak
-	$(MAKE) -s -C demo/object -f lc.mak clean all
-	( ./demo/object/load_control >> ${LOGFILE} )
-	$(MAKE) -s -C demo/object -f lc.mak clean
-
-lo: logfile demo/object/lo.mak
-	$(MAKE) -s -C demo/object -f lo.mak clean all
-	( ./demo/object/lighting_output >> ${LOGFILE} )
-	$(MAKE) -s -C demo/object -f lo.mak clean
-
-lso: logfile test/lso.mak
-	$(MAKE) -s -C test -f lso.mak clean all
-	( ./test/lso >> ${LOGFILE} )
-	$(MAKE) -s -C test -f lso.mak clean
-
-lsp: logfile demo/object/lsp.mak
-	$(MAKE) -s -C demo/object -f lsp.mak clean all
-	( ./demo/object/life_safety_point >> ${LOGFILE} )
-	$(MAKE) -s -C demo/object -f lsp.mak clean
-
-msi: logfile demo/object/msi.mak
-	$(MAKE) -s -C demo/object -f msi.mak clean all
-	( ./demo/object/multistate_input >> ${LOGFILE} )
-	$(MAKE) -s -C demo/object -f msi.mak clean
-=======
 	mso msv ms-input osv piv command \
 	access_credential access_door access_point access_rights \
 	access_user access_zone credential_data_input
@@ -433,7 +324,6 @@ ms-input: logfile demo/object/ms-input.mak
 	$(MAKE) -s -C demo/object -f ms-input.mak clean all
 	( ./demo/object/multistate_input >> ${LOGFILE} )
 	$(MAKE) -s -C demo/object -f ms-input.mak clean
->>>>>>> refs/heads/bacnet-sec
 
 mso: logfile demo/object/mso.mak
 	$(MAKE) -s -C demo/object -f mso.mak clean all

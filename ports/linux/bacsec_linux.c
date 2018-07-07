@@ -39,8 +39,8 @@ BACNET_UPDATE_DISTRIBUTION_KEY distribution_key;
 BACNET_UPDATE_KEY_SET key_sets;
 
 static bool rand_set = false;
-static HMAC_CTX hmac_ctx;
-static EVP_CIPHER_CTX evp_ctx;
+static HMAC_CTX *hmac_ctx;
+static EVP_CIPHER_CTX *evp_ctx;
 static uint8_t tmp_buf[TMP_BUF_LEN];
 
 static uint16_t next_mult_of_16(uint16_t arg)
@@ -58,7 +58,7 @@ int key_sign_msg(BACNET_KEY_ENTRY * key,
     uint8_t * signature)
 {
     uint8_t full_signature[32]; /* longest case */
-    HMAC_CTX_init(&hmac_ctx);
+    hmac_ctx = HMAC_CTX_new();
     switch (key_algorithm(key->key_identifier)) {
         case KIA_AES_MD5:
             HMAC_Init_ex(&hmac_ctx, &key->key[16], 16, EVP_md5(), NULL);
@@ -71,7 +71,7 @@ int key_sign_msg(BACNET_KEY_ENTRY * key,
     }
     HMAC_Update(&hmac_ctx, msg, msg_len);
     HMAC_Final(&hmac_ctx, full_signature, NULL);        /* we ignore the signature size */
-    HMAC_CTX_cleanup(&hmac_ctx);
+    HMAC_CTX_free(&hmac_ctx);
     memcpy(signature, full_signature, SIGNATURE_LEN);
     return 0;
 }
@@ -82,7 +82,7 @@ bool key_verify_sign_msg(BACNET_KEY_ENTRY * key,
     uint8_t * signature)
 {
     uint8_t full_signature[32]; /* longest case */
-    HMAC_CTX_init(&hmac_ctx);
+    hmac_ctx = HMAC_CTX_new();
     switch (key_algorithm(key->key_identifier)) {
         case KIA_AES_MD5:
             HMAC_Init_ex(&hmac_ctx, &key->key[16], 16, EVP_md5(), NULL);
@@ -95,7 +95,7 @@ bool key_verify_sign_msg(BACNET_KEY_ENTRY * key,
     }
     HMAC_Update(&hmac_ctx, msg, msg_len);
     HMAC_Final(&hmac_ctx, full_signature, NULL);        /* we ignore the signature size */
-    HMAC_CTX_cleanup(&hmac_ctx);
+    HMAC_CTX_free(&hmac_ctx);
     return (memcmp(signature, full_signature,
             SIGNATURE_LEN) == 0 ? true : false);
 }
@@ -106,6 +106,9 @@ int key_encrypt_msg(BACNET_KEY_ENTRY * key,
     uint8_t * signature)
 {
     int outlen, outlen2;
+    if(!evp_ctx){
+    	evp_ctx = EVP_CIPHER_CTX_new();
+    }
     switch (key_algorithm(key->key_identifier)) {
         case KIA_AES_MD5:
         case KIA_AES_SHA256:
@@ -115,61 +118,6 @@ int key_encrypt_msg(BACNET_KEY_ENTRY * key,
         default:
             return -1;
     }
-<<<<<<< HEAD
-    EVP_EncryptUpdate(&evp_ctx, tmp_buf, &outlen, msg, msg_len);
-    EVP_EncryptFinal(&evp_ctx, &msg[outlen], &outlen2);
-    EVP_CIPHER_CTX_cleanup(&evp_ctx);
-    if (outlen2 != 0)
-        return -1;
-    memcpy(msg, tmp_buf, msg_len);
-    return 0;
-}
-
-bool key_decrypt_msg(BACNET_KEY_ENTRY * key,
-    uint8_t * msg,
-    uint32_t msg_len,
-    uint8_t * signature)
-{
-    int outlen, outlen2;
-    switch (key_algorithm(key->key_identifier)) {
-        case KIA_AES_MD5:
-        case KIA_AES_SHA256:
-            EVP_DecryptInit_ex(&evp_ctx, EVP_aes_128_cbc(), NULL, key->key,
-                signature);
-            break;
-        default:
-            return false;
-    }
-    if (EVP_DecryptUpdate(&evp_ctx, tmp_buf, &outlen, msg, msg_len) == 0)
-        return false;
-    if (EVP_DecryptFinal(&evp_ctx, &msg[outlen], &outlen2) == 0)
-        return false;
-    EVP_CIPHER_CTX_cleanup(&evp_ctx);
-    if (outlen2 != 0)
-        return false;
-    memcpy(msg, tmp_buf, msg_len);
-    return true;
-}
-
-void key_set_padding(BACNET_KEY_ENTRY * key,
-    int enc_len,
-    uint16_t * padding_len,
-    uint8_t * padding)
-{
-    /* in the future, we should check for the block size, but for now it is always 16 */
-    int i;
-    uint16_t padlen = next_mult_of_16(enc_len + 2);
-    (void) key;
-    (void) padding_len;
-    if (!rand_set) {
-        srand(time(NULL));
-        rand_set = true;
-    }
-    if (padlen > 2)
-        for (i = 0; i < padlen - 2; i++)
-            padding[i] = rand();
-}
-=======
     // disable auto padding of openSSL
     // according to the openSSl documentation, padding is always added (even if msg is a multiple of blocksize)
     // this contradicts the requirements imposed by BACnet security architecture 24.2.13
@@ -177,7 +125,9 @@ void key_set_padding(BACNET_KEY_ENTRY * key,
     EVP_CIPHER_CTX_set_padding(&evp_ctx, 0);
     EVP_EncryptUpdate(&evp_ctx, tmp_buf, &outlen, msg, msg_len);
     EVP_EncryptFinal_ex(&evp_ctx, &msg[outlen], &outlen2);
-    EVP_CIPHER_CTX_cleanup(&evp_ctx);
+    if(evp_ctx){
+    	EVP_CIPHER_CTX_free(&evp_ctx);
+    }
     if (outlen2 != 0)
         return -1;
     memcpy(msg, tmp_buf, msg_len);
@@ -209,7 +159,7 @@ bool key_decrypt_msg(BACNET_KEY_ENTRY * key,
         return false;
     if (EVP_DecryptFinal_ex(&evp_ctx, &msg[outlen], &outlen2) == 0)
         return false;
-    EVP_CIPHER_CTX_cleanup(&evp_ctx);
+    EVP_CIPHER_CTX_free(&evp_ctx);
     if (outlen2 != 0)
         return false;
     memcpy(msg, tmp_buf, msg_len);
@@ -258,7 +208,6 @@ void key_set_padding(BACNET_KEY_ENTRY * key,
             padding[i] = rand();
 }
 
->>>>>>> refs/heads/bacnet-sec
 
 BACNET_SECURITY_RESPONSE_CODE bacnet_master_key_set(BACNET_SET_MASTER_KEY *
     key)

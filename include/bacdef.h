@@ -35,15 +35,10 @@
 #pragma warning( disable : 4996)
 #endif
 
-<<<<<<< HEAD
-/* This removes compilation warnings/errors about unreferenced variables. */
-#define unused_var(x) (x)=(x)
-=======
 #define SECURITY_ENABLED 1
 #define MEASURE_CLIENT 1
 #define MEASURE_SERVER 0
 #define MEASURE_ENC_SIGN 0
->>>>>>> refs/heads/bacnet-sec
 
 /* This stack implements this version of BACnet */
 #define BACNET_PROTOCOL_VERSION 1

@@ -39,13 +39,10 @@
 #include "apdu.h"
 #include "device.h"
 #include "datalink.h"
-<<<<<<< HEAD
-=======
 /* some demo stuff needed */
 #ifndef DEBUG_ENABLED
 #define DEBUG_ENABLED 0
 #endif
->>>>>>> refs/heads/bacnet-sec
 #include "debug.h"
 #include "filename.h"
 #include "handlers.h"

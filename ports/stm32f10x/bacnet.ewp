@@ -1996,12 +1996,6 @@
       <name>$PROJ_DIR$\..\..\src\npdu.c</name>
     </file>
     <file>
-<<<<<<< HEAD
-      <name>$PROJ_DIR$\..\..\src\proplist.c</name>
-    </file>
-    <file>
-=======
->>>>>>> refs/heads/bacnet-sec
       <name>$PROJ_DIR$\..\..\src\rd.c</name>
     </file>
     <file>

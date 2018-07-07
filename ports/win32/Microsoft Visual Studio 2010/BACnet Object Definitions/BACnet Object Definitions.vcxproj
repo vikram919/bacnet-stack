@@ -86,30 +86,6 @@
     <ClCompile Include="..\..\..\..\demo\object\lc.c" />
     <ClCompile Include="..\..\..\..\demo\object\lo.c" />
     <ClCompile Include="..\..\..\..\demo\object\lsp.c" />
-<<<<<<< HEAD
-    <ClCompile Include="..\..\..\..\demo\object\msi.c" />
-    <ClCompile Include="..\..\..\..\demo\object\mso.c" />
-    <ClCompile Include="..\..\..\..\demo\object\msv.c" />
-    <ClCompile Include="..\..\..\..\demo\object\osv.c" />
-    <ClCompile Include="..\..\..\..\demo\object\piv.c" />
-    <ClCompile Include="..\..\..\..\demo\object\schedule.c" />
-    <ClCompile Include="..\..\..\..\demo\object\trendlog.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\..\..\demo\object\ai.h" />
-    <ClInclude Include="..\..\..\..\demo\object\ao.h" />
-    <ClInclude Include="..\..\..\..\demo\object\av.h" />
-    <ClInclude Include="..\..\..\..\demo\object\bacfile.h" />
-    <ClInclude Include="..\..\..\..\demo\object\bi.h" />
-    <ClInclude Include="..\..\..\..\demo\object\bo.h" />
-    <ClInclude Include="..\..\..\..\demo\object\bv.h" />
-    <ClInclude Include="..\..\..\..\demo\object\csv.h" />
-    <ClInclude Include="..\..\..\..\demo\object\device.h" />
-    <ClInclude Include="..\..\..\..\demo\object\lc.h" />
-    <ClInclude Include="..\..\..\..\demo\object\lo.h" />
-    <ClInclude Include="..\..\..\..\demo\object\lsp.h" />
-    <ClInclude Include="..\..\..\..\demo\object\msi.h" />
-=======
     <ClCompile Include="..\..\..\..\demo\object\ms-input.c" />
     <ClCompile Include="..\..\..\..\demo\object\mso.c" />
     <ClCompile Include="..\..\..\..\demo\object\msv.c" />
@@ -132,7 +108,6 @@
     <ClInclude Include="..\..\..\..\demo\object\lo.h" />
     <ClInclude Include="..\..\..\..\demo\object\lsp.h" />
     <ClInclude Include="..\..\..\..\demo\object\ms-input.h" />
->>>>>>> refs/heads/bacnet-sec
     <ClInclude Include="..\..\..\..\demo\object\mso.h" />
     <ClInclude Include="..\..\..\..\demo\object\msv.h" />
     <ClInclude Include="..\..\..\..\demo\object\nc.h" />

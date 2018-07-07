@@ -69,11 +69,6 @@ static void match_name_or_object(
             object.identifier.type, data->object.identifier.instance,
             &object_name);
         if (found) {
-<<<<<<< HEAD
-            Send_I_Have(Device_Object_Instance_Number(),
-                (BACNET_OBJECT_TYPE) data->object.identifier.type,
-                data->object.identifier.instance, &object_name);
-=======
 #if MEASURE_CLIENT
        struct timespec t1, t2, clock_resolution;
        long long elapsedTime;
@@ -96,7 +91,6 @@ static void match_name_or_object(
        	fclose(file);
        }
 #endif
->>>>>>> refs/heads/bacnet-sec
         }
     }
 }

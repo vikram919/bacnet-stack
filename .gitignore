@@ -1,5 +1,4 @@
 *.o
-<<<<<<< HEAD
 *.a
 *.so
 *.dylib
@@ -32,7 +31,6 @@ bacserv
 bacucov
 bacwh
 bacwir
-=======
 /bin
 .cproject
 .settings/

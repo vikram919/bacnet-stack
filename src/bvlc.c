@@ -1654,8 +1654,6 @@ BACNET_BVLC_FUNCTION bvlc_get_function_code(
     return BVLC_Function_Code;
 }
 
-<<<<<<< HEAD
-#if defined(BBMD_ENABLED) && BBMD_ENABLED
 /** Get handle to broadcast distribution table (BDT).
  *
  *  Do not modify the table using the returned pointer,
@@ -1736,89 +1734,6 @@ bool bvlc_add_bdt_entry_local(
 
     return true;
 }
-#endif
-=======
-/** Get handle to broadcast distribution table (BDT).
- *
- *  Do not modify the table using the returned pointer,
- *  use the dedicated functions instead.
- *  (For optimization the table is not copied to caller)
- *
- * @param table [out] - broadcast distribution table
- *
- * @return Number of valid entries in the table or -1 on error.
- */
-int bvlc_get_bdt_local(
-     const BBMD_TABLE_ENTRY** table)
-{
-    int count = 0;
-
-    if(table == NULL)
-        return -1;
-
-    *table = BBMD_Table;
-
-    for (count = 0; count < MAX_BBMD_ENTRIES; ++count) {
-        if (!BBMD_Table[count].valid) {
-            break;
-        }
-    }
-
-    return count;
-}
-
-/** Invalidate all entries in the broadcast distribution table (BDT).
- */
-void bvlc_clear_bdt_local(
-    void)
-{
-    int i = 0;
-    for (i = 0; i < MAX_BBMD_ENTRIES; ++i) {
-        BBMD_Table[i].valid = false;
-        BBMD_Table[i].dest_address.s_addr = 0;
-        BBMD_Table[i].dest_port = 0;
-        BBMD_Table[i].broadcast_mask.s_addr = 0;
-    }
-}
-
-/** Add new entry to broadcast distribution table.
- *
- * @return True if the new entry was added successfully.
- */
-bool bvlc_add_bdt_entry_local(
-    BBMD_TABLE_ENTRY* entry)
-{
-    bool found = false;
-    int i = 0;
-
-    if(entry == NULL)
-        return false;
-
-    /* Find first empty slot */
-    for (i = 0; i < MAX_BBMD_ENTRIES; ++i) {
-        if (!BBMD_Table[i].valid) {
-            found = true;
-            break;
-        }
-
-        /* Make sure that we are not adding a duplicate */
-        if(BBMD_Table[i].dest_address.s_addr == entry->dest_address.s_addr &&
-           BBMD_Table[i].broadcast_mask.s_addr == entry->broadcast_mask.s_addr &&
-           BBMD_Table[i].dest_port == entry->dest_port) {
-            return false;
-        }
-    }
-
-    if(!found)
-        return false;
-
-    /* Copy new entry to the empty slot */
-    BBMD_Table[i] = *entry;
-    BBMD_Table[i].valid = true;
-
-    return true;
-}
->>>>>>> refs/heads/bacnet-sec
 
 /** Enable NAT handling and set the global IP address
  * @param [in] - Global IP address visible to peer BBMDs and foreign devices

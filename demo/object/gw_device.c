@@ -53,11 +53,7 @@
 #include "lc.h"
 #include "lsp.h"
 #include "mso.h"
-<<<<<<< HEAD
-#include "msi.h"
-=======
 #include "ms-input.h"
->>>>>>> refs/heads/bacnet-sec
 #include "trendlog.h"
 #if defined(BACFILE)
 #include "bacfile.h"    /* object list dependency */

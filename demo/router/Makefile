@@ -13,11 +13,7 @@ ifeq (${BACNET_PORT},linux)
 #PFLAGS =
 # -pthread
 TARGET_EXT =
-<<<<<<< HEAD
-LIBS = -lpthread
-=======
 LIBS = -lpthread -lconfig
->>>>>>> refs/heads/bacnet-sec
 LFLAGS += $(LIBS)
 endif
 
