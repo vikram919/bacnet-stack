@@ -221,6 +221,10 @@ int encode_challenge_request(uint8_t * apdu,
     return curr;
 }
 
+/**
+ * encodes the security payload message consisting of payload length
+ * and payload itself into apdu.
+ */
 int encode_security_payload(uint8_t * apdu,
     BACNET_SECURITY_PAYLOAD * payload)
 {
@@ -613,6 +617,10 @@ int decode_challenge_request_safe(uint8_t * apdu,
     return curr;        /* always 9! */
 }
 
+/**
+ * Decodes the given apdu to security payload message consting of payload length
+ * and payload itself.
+ */
 int decode_security_payload_safe(uint8_t * apdu,
     uint32_t apdu_len_remaining,
     BACNET_SECURITY_PAYLOAD * payload)
