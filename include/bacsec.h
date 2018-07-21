@@ -232,8 +232,13 @@ extern "C" {
     int encode_security_wrapper(int bytes_before,
         uint8_t * apdu,
         BACNET_SECURITY_WRAPPER * wrapper);
+
+    /**
+     * Allocates challenge request struct elements to the apdu array.
+     */
     int encode_challenge_request(uint8_t * apdu,
         BACNET_CHALLENGE_REQUEST * bc_req);
+
     int encode_security_payload(uint8_t * apdu,
         BACNET_SECURITY_PAYLOAD * payload);
     int encode_security_response(uint8_t * apdu,
@@ -256,9 +261,15 @@ extern "C" {
         uint8_t * apdu,
         uint32_t apdu_len_remaining,
         BACNET_SECURITY_WRAPPER * wrapper);
+
+    /*
+     * Decodes the apdu message of 9 octets to challenge request struct,
+     * returns -1 if the size of apdu is < 9 octets.
+     */
     int decode_challenge_request_safe(uint8_t * apdu,
         uint32_t apdu_len_remaining,
         BACNET_CHALLENGE_REQUEST * bc_req);
+
     int decode_security_payload_safe(uint8_t * apdu,
         uint32_t apdu_len_remaining,
         BACNET_SECURITY_PAYLOAD * payload);

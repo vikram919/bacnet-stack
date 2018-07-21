@@ -204,14 +204,18 @@ int encode_security_wrapper(int bytes_before,
     curr += SIGNATURE_LEN;
     return curr;
 }
-
+/**
+ * encodes the apdu message with challenge_request struct.
+ */
 int encode_challenge_request(uint8_t * apdu,
     BACNET_CHALLENGE_REQUEST * bc_req)
 {
     int curr = 0;
 
     apdu[curr++] = bc_req->message_challenge;
+    /*fills the apdu message with original message id for 4 octets*/
     curr += encode_unsigned32(&apdu[curr], bc_req->orig_message_id);
+    /*encodes apdu message with original time stamp for 4 octets*/
     curr += encode_unsigned32(&apdu[curr], bc_req->orig_timestamp);
 
     return curr;
@@ -592,6 +596,7 @@ int decode_security_wrapper_safe(int bytes_before,
     return curr;
 }
 
+/*decodes apdu to challenge request,*/
 int decode_challenge_request_safe(uint8_t * apdu,
     uint32_t apdu_len_remaining,
     BACNET_CHALLENGE_REQUEST * bc_req)
